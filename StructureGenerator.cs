@@ -1,20 +1,26 @@
 ﻿using dnlib.DotNet;
 using Kokuban;
 using System.Text;
+using System.Text.RegularExpressions;
+using static TarkovDumper.StructureGenerator;
 
 namespace TarkovDumper
 {
-    public sealed class StructGenerator(string name)
+    public sealed class StructureGenerator(string name, eStructureType structureType = eStructureType.Struct)
     {
         private const string namespaceTemplate = "namespace ${name}";
         private const string structTemplate = "public readonly struct ${name}";
         private const string stringTemplate = "public const string ${name} = @\"${value}\";";
+        private const string enumTemplate = "public enum ${name}";
+        private const string enumBodyTemplate = "${name} = ${value},";
         private const string offsetTemplate = "public const uint ${name} = ${value}; // ${comment}";
         private const string offsetChainTemplate = "public static readonly uint[] ${name} = new uint[] { ${values} }; // ${comment}";
 
         private readonly string _name = name;
+        private readonly eStructureType _structureType = structureType;
+
         private readonly List<string> _inlineEntries = new();
-        private readonly List<StructGenerator> _nestedStructs = new();
+        private readonly List<StructureGenerator> _nestedStructures = new();
 
         public int ClassesProcessed { get; private set; } = 0;
         public int ClassesErrored { get; private set; } = 0;
@@ -24,6 +30,17 @@ namespace TarkovDumper
 
         public int OffsetsProcessed { get; private set; } = 0;
         public int OffsetsErrored { get; private set; } = 0;
+
+        public int EnumsProcessed { get; private set; } = 0;
+        public int EnumsErrored { get; private set; } = 0;
+
+        private bool Flags = false;
+
+        public enum eStructureType
+        {
+            Struct,
+            Enum,
+        }
 
         public void AddClassName(TypeDef typeDef, string variable, string entity, bool outputFullName = false)
         {
@@ -153,14 +170,39 @@ namespace TarkovDumper
             OffsetsProcessed++;
         }
 
+        public void AddEnum(List<FieldDef> fields, bool flags = false, bool colorize = true)
+        {
+            if (fields == null)
+            {
+                EnumsErrored++;
+                return;
+            }
+
+            Flags = flags;
+
+            foreach (var field in fields)
+            {
+                string name = field.Name;
+                string value = field.Constant.Value.ToString();
+                string output = HydrateEnumBodyTemplate(name, value);
+
+                if (colorize)
+                    output = ColorizeEnumBodyTemplate(output);
+
+                _inlineEntries.Add(output);
+            }
+
+            EnumsProcessed++;
+        }
+
         public void AddEmptyLine()
         {
             _inlineEntries.Add("");
         }
 
-        public void AddStruct(StructGenerator nestedStruct)
+        public void AddStruct(StructureGenerator nestedStruct)
         {
-            _nestedStructs.Add(nestedStruct);
+            _nestedStructures.Add(nestedStruct);
 
             ClassesProcessed += nestedStruct.ClassesProcessed;
             ClassesErrored += nestedStruct.ClassesErrored;
@@ -170,6 +212,9 @@ namespace TarkovDumper
 
             OffsetsProcessed += nestedStruct.OffsetsProcessed;
             OffsetsErrored += nestedStruct.OffsetsErrored;
+
+            EnumsProcessed += nestedStruct.EnumsProcessed;
+            EnumsErrored += nestedStruct.EnumsErrored;
         }
 
         public void AddError(string message)
@@ -181,33 +226,56 @@ namespace TarkovDumper
         {
             var sb = new StringBuilder();
 
-            if (colorize)
-                sb.AppendLine(ColorizeStructTemplate(InsertInTemplate(structTemplate, "name", _name)));
-            else
-                sb.AppendLine(InsertInTemplate(structTemplate, "name", _name));
+            if (structureType == eStructureType.Struct)
+            {
+                if (colorize)
+                    sb.AppendLine(ColorizeStructTemplate(InsertInTemplate(structTemplate, "name", _name)));
+                else
+                    sb.AppendLine(InsertInTemplate(structTemplate, "name", _name));
+            }
+            else if (structureType == eStructureType.Enum)
+            {
+                if (Flags)
+                    sb.AppendLine(Chalk.Green + "[Flags]");
+
+                if (colorize)
+                    sb.AppendLine(ColorizeStructTemplate(InsertInTemplate(enumTemplate, "name", _name)));
+                else
+                    sb.AppendLine(InsertInTemplate(enumTemplate, "name", _name));
+            }
 
             sb.AppendLine("{");
 
-            if (_inlineEntries.Count == 0 && _nestedStructs.Count == 0)
+            if (_inlineEntries.Count == 0 && _nestedStructures.Count == 0)
                 AddError("No data!");
 
             bool linesAppended = false;
-
             foreach (var constString in _inlineEntries)
             {
-                sb.AppendLine($"\t{constString}");
+                if (!colorize)
+                    sb.AppendLine($"\t{TextHelper.CleanANSI(constString)}");
+                else
+                    sb.AppendLine($"\t{constString}");
+
                 linesAppended = true;
             }
 
-            for (int i = 0; i < _nestedStructs.Count; i++)
+            if (structureType == eStructureType.Struct)
             {
-                var nestedStruct = _nestedStructs[i];
+                for (int i = 0; i < _nestedStructures.Count; i++)
+                {
+                    var nestedStruct = _nestedStructures[i];
 
-                if (i > 0 || (i == 0 && linesAppended))
-                    sb.AppendLine("");
+                    if (i > 0 || (i == 0 && linesAppended))
+                        sb.AppendLine("");
 
-                string nestedString = nestedStruct.ToString(colorize).Replace("\n", "\n\t");
-                sb.AppendLine($"\t{nestedString.TrimEnd()}");
+                    string nestedString = nestedStruct.ToString(colorize).Replace("\n", "\n\t");
+
+                    if (!colorize)
+                        nestedString = TextHelper.CleanANSI(nestedString);
+
+                    sb.AppendLine($"\t{nestedString.TrimEnd()}");
+                }
             }
 
             sb.AppendLine("}");
@@ -241,8 +309,9 @@ namespace TarkovDumper
             string classes = ProcessReportItem("Classes", ClassesProcessed, ClassesErrored);
             string methods = ProcessReportItem("Methods", MethodsProcessed, MethodsErrored);
             string offsets = ProcessReportItem("Offsets", OffsetsProcessed, OffsetsErrored);
+            string enums = ProcessReportItem("Enums", EnumsProcessed, EnumsErrored);
 
-            if (classes == null && methods == null && offsets == null)
+            if (classes == null && methods == null && offsets == null && enums == null)
                 return null;
 
             sb.AppendLine(Chalk.White + $"{_name} Generation Report");
@@ -252,11 +321,13 @@ namespace TarkovDumper
                 sb.AppendLine(methods);
             if (offsets != null)
                 sb.AppendLine(offsets);
+            if (enums != null)
+                sb.AppendLine(enums);
 
             return sb.ToString();
         }
 
-        public static string GenerateNamespace(string name, List<StructGenerator> structs, bool colorize = true)
+        public static string GenerateNamespace(string name, List<StructureGenerator> structs, bool colorize = true)
         {
             var sb = new StringBuilder();
 
@@ -285,7 +356,7 @@ namespace TarkovDumper
             return sb.ToString();
         }
 
-        public static string GenerateReports(List<StructGenerator> structs)
+        public static string GenerateReports(List<StructureGenerator> structs)
         {
             var sb = new StringBuilder();
 
@@ -298,9 +369,6 @@ namespace TarkovDumper
                     continue;
 
                 sb.AppendLine(report);
-
-                if (i + 1 < structs.Count)
-                    sb.AppendLine("");
             }
 
             return sb.ToString();
@@ -343,6 +411,16 @@ namespace TarkovDumper
             return template;
         }
 
+        private static string HydrateEnumBodyTemplate(string name, string value)
+        {
+            string template = enumBodyTemplate;
+
+            template = InsertInTemplate(template, "name", name);
+            template = InsertInTemplate(template, "value", value);
+
+            return template;
+        }
+
         private static string ColorizeStringTemplate(string template)
         {
             template = Chalk.Blue + template;
@@ -367,6 +445,20 @@ namespace TarkovDumper
             template = template.Replace(varName + ' ', Chalk.White + varName + ' ');
 
             template = template.Split('=')[0] + '=' + Chalk.Green + template.Split('=')[1].Split(';')[0] + ';' + Chalk.Yellow + template.Split(";")[1];
+
+            return template;
+        }
+
+        private static string ColorizeEnumBodyTemplate(string template)
+        {
+            template = Chalk.Blue + template;
+
+            var varNameCandidates = template.Split('=')[0].Split(' ');
+            string varName = varNameCandidates[^2];
+
+            template = template.Replace(varName + ' ', Chalk.White + varName + ' ');
+
+            template = template.Split('=')[0] + '=' + Chalk.Green + template.Split('=')[1].Split(',')[0] + ',';
 
             return template;
         }

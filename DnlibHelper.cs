@@ -114,6 +114,39 @@ namespace TarkovDumper
         }
 
         /// <summary>
+        /// Finds an enum by it's type name.
+        /// </summary>
+        public TypeDef FindEnumByTypeName(string typeName)
+        {
+            TypeDef tdFind = _module.Find(typeName, true);
+            if (tdFind != null)
+                return tdFind;
+
+            foreach (TypeDef type in _module.GetTypes())
+            {
+                string fullName = type.FullName.Replace('/', '.');
+
+                if (fullName == typeName || type.Name == typeName)
+                    return type;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the fields of an enum.
+        /// </summary>
+        public List<FieldDef> GetEnumValues(TypeDef enumType)
+        {
+            if (enumType == null || !enumType.IsEnum)
+                return null;
+
+            var enumFields = enumType.Fields.Where(f => f.IsLiteral && f.HasConstant).Select(f => f);
+
+            return enumFields.ToList();
+        }
+
+        /// <summary>
         /// Finds a class by it's fully qualified name (Namespace+Name in "." format)
         /// </summary>
         public TypeDef FindClassByTypeName(string typeName)

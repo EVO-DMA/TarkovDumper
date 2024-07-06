@@ -15,7 +15,11 @@ namespace TarkovDumper
 
         public Processor(string assemblyPath, string dumpPath)
         {
-            try { _module = ModuleDefMD.Load(assemblyPath); }
+            try
+            {
+                _module = ModuleDefMD.Load(assemblyPath);
+                _module.EnableTypeDefFindCache = true;
+            }
             catch (Exception ex)
             {
                 throw new Exception($"[bold yellow]Error loading assembly ~[/] [red]{ex.Message}[/]");
@@ -48,7 +52,7 @@ namespace TarkovDumper
             }
         }
 
-        public void ProcessGameData(StatusContext ctx, StructGenerator structGenerator)
+        public void ProcessGameData(StatusContext ctx, StructureGenerator structGenerator)
         {
             structGenerator.AddString("GameHostname", "prod.escapefromtarkov.com");
             structGenerator.AddString("LauncherHostname", "launcher.escapefromtarkov.com");
@@ -58,7 +62,7 @@ namespace TarkovDumper
             structGenerator.AddString("UNITY_VERSION", "2019.4.39.7917901");
         }
 
-        public void ProcessClassNames(StatusContext ctx, StructGenerator structGenerator)
+        public void ProcessClassNames(StatusContext ctx, StructureGenerator structGenerator)
         {
             void SetVariableStatus(string variable)
             {
@@ -70,7 +74,7 @@ namespace TarkovDumper
                 string variable = "GameVersion";
                 SetVariableStatus(variable);
 
-                StructGenerator nestedStruct = new("GameVersion");
+                StructureGenerator nestedStruct = new("GameVersion");
 
                 // Find the class that has all of these fields
                 List<DnlibHelper.EntitySearchListEntry> searchEntities = new()
@@ -102,7 +106,7 @@ namespace TarkovDumper
                 string variable = "ClassName";
                 SetVariableStatus(variable);
 
-                StructGenerator nestedStruct = new("StreamerMode");
+                StructureGenerator nestedStruct = new("StreamerMode");
                 nestedStruct.AddString("MethodName", "IsLocalStreamer");
 
                 nestedStruct.AddEmptyLine();
@@ -117,7 +121,7 @@ namespace TarkovDumper
                 string variable = "ClassName";
                 SetVariableStatus(variable);
 
-                StructGenerator nestedStruct = new("FixWildSpawnType");
+                StructureGenerator nestedStruct = new("FixWildSpawnType");
                 nestedStruct.AddString("MethodName", entity);
 
                 nestedStruct.AddEmptyLine();
@@ -217,7 +221,7 @@ namespace TarkovDumper
                 string name = @"EFT.InventoryLogic.EquipmentPenaltyComponent";
                 SetVariableStatus(name);
                 
-                StructGenerator nestedStruct = new("EquipmentPenaltyComponent");
+                StructureGenerator nestedStruct = new("EquipmentPenaltyComponent");
                 nestedStruct.AddString("ClassName", name + @"+\uE000");
 
                 nestedStruct.AddEmptyLine();
@@ -260,7 +264,7 @@ namespace TarkovDumper
                 string name = "UnlimitedSearch";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 nestedStruct.AddMethodName("CanStartNewSearchOperation", "MethodName", "N/A");
 
@@ -277,7 +281,7 @@ namespace TarkovDumper
                 string name = "AmmoTemplate";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity = "get_LoadUnloadModifier";
                 var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method);
@@ -290,7 +294,7 @@ namespace TarkovDumper
                 string name = "NoMalfunctions";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity = "GetMalfunctionState";
 
@@ -308,7 +312,7 @@ namespace TarkovDumper
                 string name = "InventoryController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity1 = "IsAtReachablePlace";
                 string entity2 = "IsAtBindablePlace";
@@ -330,7 +334,7 @@ namespace TarkovDumper
                 string name = "OpticCameraManagerContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity = "ApplyDovFovOnCamera";
 
@@ -344,7 +348,7 @@ namespace TarkovDumper
                 string name = "ScreenManager";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity = "InitChatScreen";
 
@@ -359,7 +363,7 @@ namespace TarkovDumper
                 string variable = "ClassName";
                 SetVariableStatus(variable);
 
-                StructGenerator nestedStruct = new("FovChanger");
+                StructureGenerator nestedStruct = new("FovChanger");
                 nestedStruct.AddString("MethodName", entity);
 
                 nestedStruct.AddEmptyLine();
@@ -370,7 +374,7 @@ namespace TarkovDumper
             }
         }
 
-        public void ProcessOffsets(StatusContext ctx, StructGenerator structGenerator)
+        public void ProcessOffsets(StatusContext ctx, StructureGenerator structGenerator)
         {
             void SetVariableStatus(string variable)
             {
@@ -382,7 +386,7 @@ namespace TarkovDumper
                 string name = "TarkovApplication";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity = "To_Profile";
 
@@ -422,7 +426,7 @@ namespace TarkovDumper
                 string name = "GameWorld";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -447,7 +451,7 @@ namespace TarkovDumper
                 string name = "ClientLocalGameWorld";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -534,7 +538,7 @@ namespace TarkovDumper
                 string name = "MineDirectional";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -559,7 +563,7 @@ namespace TarkovDumper
                 string name = "MineSettings";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -586,7 +590,7 @@ namespace TarkovDumper
                 string name = "BorderZone";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -617,7 +621,7 @@ namespace TarkovDumper
                 string name = "LevelSettings";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -656,7 +660,7 @@ namespace TarkovDumper
                 string name = "EFTHardSettings";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -702,7 +706,7 @@ namespace TarkovDumper
                 string name = "GlobalConfigs";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -721,7 +725,7 @@ namespace TarkovDumper
                 string name = "InertiaSettings";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity = "Inertia";
 
@@ -769,7 +773,7 @@ namespace TarkovDumper
                 string name = "ExfilController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -803,7 +807,7 @@ namespace TarkovDumper
                 string name = "Exfil";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -837,7 +841,7 @@ namespace TarkovDumper
                 string name = "ScavExfil";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -857,7 +861,7 @@ namespace TarkovDumper
                 string name = "ExfilSettings";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -877,7 +881,7 @@ namespace TarkovDumper
                 string name = "GenericCollectionContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity = "Grenades";
 
@@ -904,7 +908,7 @@ namespace TarkovDumper
                 string name = "Grenade";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -939,7 +943,7 @@ namespace TarkovDumper
                 string name = "Player";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1078,7 +1082,7 @@ namespace TarkovDumper
                 string name = "AIData";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1098,7 +1102,7 @@ namespace TarkovDumper
                 string name = "ObservedPlayerView";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1193,7 +1197,7 @@ namespace TarkovDumper
                 string name = "ObservedPlayerController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
                 
@@ -1279,7 +1283,7 @@ namespace TarkovDumper
                 string name = "ObservedMovementController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1321,7 +1325,7 @@ namespace TarkovDumper
                 string name = "ObservedHandsController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1352,7 +1356,7 @@ namespace TarkovDumper
                 string name = "ObservedHealthController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1390,7 +1394,7 @@ namespace TarkovDumper
                 string name = "SimpleCharacterController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1433,7 +1437,7 @@ namespace TarkovDumper
                 string name = "InfoContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1460,7 +1464,7 @@ namespace TarkovDumper
                 string name = "PlayerSpawnInfo";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1489,7 +1493,7 @@ namespace TarkovDumper
                 string name = "Physical";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1620,7 +1624,7 @@ namespace TarkovDumper
                 string name = "PhysicalValue";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1647,7 +1651,7 @@ namespace TarkovDumper
                 string name = "ProceduralWeaponAnimation";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1723,7 +1727,7 @@ namespace TarkovDumper
                 string name = "BreathEffector";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1743,7 +1747,7 @@ namespace TarkovDumper
                 string name = "ShotEffector";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1761,7 +1765,7 @@ namespace TarkovDumper
                 string name = "NewShotRecoil";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1781,7 +1785,7 @@ namespace TarkovDumper
                 string name = "ThermalVision";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1806,7 +1810,7 @@ namespace TarkovDumper
                 string name = "NightVision";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1826,7 +1830,7 @@ namespace TarkovDumper
                 string name = "VisorEffect";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1848,7 +1852,7 @@ namespace TarkovDumper
                 string name = "Profile";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1903,7 +1907,7 @@ namespace TarkovDumper
                 string name = "ProfileStatsContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1932,7 +1936,7 @@ namespace TarkovDumper
                 string name = "ProfileStats";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1957,7 +1961,7 @@ namespace TarkovDumper
                 string name = "OverallCounters";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -1986,7 +1990,7 @@ namespace TarkovDumper
                 string name = "PlayerInfo";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2066,7 +2070,7 @@ namespace TarkovDumper
                 string name = "PlayerInfoSettings";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2095,7 +2099,7 @@ namespace TarkovDumper
                 string name = "SkillManager";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2136,7 +2140,7 @@ namespace TarkovDumper
                 string name = "SkillValueContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2165,7 +2169,7 @@ namespace TarkovDumper
                 string name = "QuestData";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2215,7 +2219,7 @@ namespace TarkovDumper
                 string name = "QuestTemplate";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2247,7 +2251,7 @@ namespace TarkovDumper
                 string name = "QuestConditionsContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2290,7 +2294,7 @@ namespace TarkovDumper
                 string name = "QuestCondition";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2310,7 +2314,7 @@ namespace TarkovDumper
                 string name = "QuestConditionFindItem";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2330,7 +2334,7 @@ namespace TarkovDumper
                 string name = "QuestConditionCounterCreator";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2350,7 +2354,7 @@ namespace TarkovDumper
                 string name = "QuestConditionPlaceBeacon";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2370,7 +2374,7 @@ namespace TarkovDumper
                 string name = "QuestConditionCounterTemplate";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2390,7 +2394,7 @@ namespace TarkovDumper
                 string name = "ItemHandsController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2412,7 +2416,7 @@ namespace TarkovDumper
                 string name = "FirearmController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2443,7 +2447,7 @@ namespace TarkovDumper
                 string name = "MovementContext";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2526,7 +2530,7 @@ namespace TarkovDumper
                 string name = "MovementState";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2553,7 +2557,7 @@ namespace TarkovDumper
                 string name = "StationaryWeapon";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2582,7 +2586,7 @@ namespace TarkovDumper
                 string name = "InventoryController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2607,7 +2611,7 @@ namespace TarkovDumper
                 string name = "Inventory";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2627,7 +2631,7 @@ namespace TarkovDumper
                 string name = "Equipment";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2654,7 +2658,7 @@ namespace TarkovDumper
                 string name = "Slot";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2688,7 +2692,7 @@ namespace TarkovDumper
                 string name = "InteractiveLootItem";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2714,7 +2718,7 @@ namespace TarkovDumper
                 string name = "LootableContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2734,7 +2738,7 @@ namespace TarkovDumper
                 string name = "LootableContainerItemOwner";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2765,7 +2769,7 @@ namespace TarkovDumper
                 string name = "LootItem";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2808,7 +2812,7 @@ namespace TarkovDumper
                 string name = "LootItemMod";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2837,7 +2841,7 @@ namespace TarkovDumper
                 string name = "LootItemModGrids";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2868,7 +2872,7 @@ namespace TarkovDumper
                 string name = "LootItemModGridsItemCollection";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2895,7 +2899,7 @@ namespace TarkovDumper
                 string name = "LootItemWeapon";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2915,7 +2919,7 @@ namespace TarkovDumper
                 string name = "LootItemMagazine";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2952,7 +2956,7 @@ namespace TarkovDumper
                 string name = "StackSlot";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -2979,7 +2983,7 @@ namespace TarkovDumper
                 string name = "ItemTemplate";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3020,7 +3024,7 @@ namespace TarkovDumper
                 string name = "ModTemplate";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3040,7 +3044,7 @@ namespace TarkovDumper
                 string name = "AmmoTemplate";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3081,7 +3085,7 @@ namespace TarkovDumper
                 string name = "WeaponTemplate";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3103,7 +3107,7 @@ namespace TarkovDumper
                 string name = "PlayerBody";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3137,7 +3141,7 @@ namespace TarkovDumper
                 string name = "PlayerBodySubclass";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3159,7 +3163,7 @@ namespace TarkovDumper
                 string name = "Dress";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3179,7 +3183,7 @@ namespace TarkovDumper
                 string name = "Skeleton";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3199,7 +3203,7 @@ namespace TarkovDumper
                 string name = "LoddedSkin";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3219,7 +3223,7 @@ namespace TarkovDumper
                 string name = "Skin";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3239,7 +3243,7 @@ namespace TarkovDumper
                 string name = "TorsoSkin";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3259,7 +3263,7 @@ namespace TarkovDumper
                 string name = "SlotViewsContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3286,7 +3290,7 @@ namespace TarkovDumper
                 string name = "InventoryBlur";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3311,7 +3315,7 @@ namespace TarkovDumper
                 string name = "WeatherController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3331,7 +3335,7 @@ namespace TarkovDumper
                 string name = "WeatherDebug";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3386,7 +3390,7 @@ namespace TarkovDumper
                 string name = "TOD_Scattering";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3404,7 +3408,7 @@ namespace TarkovDumper
                 string name = "TOD_Sky";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3429,7 +3433,7 @@ namespace TarkovDumper
                 string name = "TOD_CycleParameters";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3447,7 +3451,7 @@ namespace TarkovDumper
                 string name = "TOD_Components";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3465,7 +3469,7 @@ namespace TarkovDumper
                 string name = "TOD_Time";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3483,7 +3487,7 @@ namespace TarkovDumper
                 string name = "PrismEffects";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3508,7 +3512,7 @@ namespace TarkovDumper
                 string name = "CC_Vintage";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3528,7 +3532,7 @@ namespace TarkovDumper
                 string name = "GPUInstancerManager";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3548,7 +3552,7 @@ namespace TarkovDumper
                 string name = "RuntimeDataList";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3577,7 +3581,7 @@ namespace TarkovDumper
                 string name = "GameSettingsContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3613,7 +3617,7 @@ namespace TarkovDumper
                 string name = "GameSettingsInnerContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3647,7 +3651,7 @@ namespace TarkovDumper
                 string name = "GameSettings";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3688,7 +3692,7 @@ namespace TarkovDumper
                 string name = "GraphicsSettings";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3715,7 +3719,7 @@ namespace TarkovDumper
                 string name = "NetworkContainer";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3746,7 +3750,7 @@ namespace TarkovDumper
                 string name = "ScreenManager";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3787,7 +3791,7 @@ namespace TarkovDumper
                 string name = "CurrentScreenController";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3817,7 +3821,7 @@ namespace TarkovDumper
                 string name = "BSGGameSetting";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3834,7 +3838,7 @@ namespace TarkovDumper
                 string name = "BSGGameSettingValueClass";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3851,7 +3855,7 @@ namespace TarkovDumper
                 string name = "SSAA";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3868,7 +3872,7 @@ namespace TarkovDumper
                 string name = "BloomAndFlares";
                 SetVariableStatus(name);
 
-                StructGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new(name);
 
                 string entity;
 
@@ -3877,6 +3881,180 @@ namespace TarkovDumper
 
                     nestedStruct.AddOffset(entity, new(true, new(entity, "[HUMAN] Single", 0xB8)));
                 }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+        }
+
+        public void ProcessEnums(StatusContext ctx, StructureGenerator structGenerator)
+        {
+            void SetVariableStatus(string variable)
+            {
+                LastStepName = variable;
+                ctx.Status(variable);
+            }
+
+            {
+                const string name = "EPlayerState";
+                const string typeName = "EPlayerState";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "EPlayerSide";
+                const string typeName = "EFT.EPlayerSide";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "ETagStatus";
+                const string typeName = "ETagStatus";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields, flags: true);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "EMemberCategory";
+                const string typeName = "EMemberCategory";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields, flags: true);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "WildSpawnType";
+                const string typeName = "EFT.WildSpawnType";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "EExfiltrationStatus";
+                const string typeName = "EFT.Interactive.EExfiltrationStatus";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "EMalfunctionState";
+                const string typeName = "EMalfunctionState";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "EPhysicalCondition";
+                const string typeName = "EFT.EPhysicalCondition";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields, true);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "EProceduralAnimationMask";
+                const string typeName = "EFT.Animations.EProceduralAnimationMask";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields, true);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "EAnimatorMask";
+                const string typeName = "EAnimatorMask";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields, true);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "InventoryBlurDimensions";
+                const string typeName = "InventoryBlur.Dimensions";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
 
                 structGenerator.AddStruct(nestedStruct);
             }

@@ -1,5 +1,6 @@
 ﻿using dnlib.DotNet;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TarkovDumper
 {
@@ -124,6 +125,11 @@ namespace TarkovDumper
             }
 
             return input.Substring(backwardIndex, startIndex - backwardIndex).Trim();
+        }
+
+        public static string CleanANSI(string ansiString)
+        {
+            return Regex.Replace(ansiString, "[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]", string.Empty);
         }
     }
 }
