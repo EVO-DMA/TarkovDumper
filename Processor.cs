@@ -1658,6 +1658,13 @@ namespace TarkovDumper
                 const string className = "EFT.Animations.ProceduralWeaponAnimation";
 
                 {
+                    entity = "HandsContainer";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
                     entity = "Breath";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
@@ -1715,6 +1722,26 @@ namespace TarkovDumper
 
                 {
                     entity = "PositionZeroSum";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "PlayerSpring";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "EFT.Animations.PlayerSpring";
+
+                {
+                    entity = "CameraTransform";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
@@ -2504,6 +2531,13 @@ namespace TarkovDumper
 
                 {
                     entity = "<StateSprintSpeedLimit>k__BackingField";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "_lookDirection";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
