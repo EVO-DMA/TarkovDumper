@@ -3136,6 +3136,7 @@ namespace TarkovDumper
             }
 
             DumpParser.Result<DumpParser.OffsetData> PlayerBodySlotViewsOffset = default;
+            DumpParser.Result<DumpParser.OffsetData> PointOfViewOffset = default;
 
             {
                 string name = "PlayerBody";
@@ -3166,6 +3167,13 @@ namespace TarkovDumper
 
                     PlayerBodySlotViewsOffset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, PlayerBodySlotViewsOffset);
+                }
+
+                {
+                    entity = "PointOfView";
+
+                    PointOfViewOffset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, PointOfViewOffset);
                 }
 
                 structGenerator.AddStruct(nestedStruct);
@@ -3313,6 +3321,33 @@ namespace TarkovDumper
                     entity = "Dict";
 
                     var offset = _dumpParser.FindOffsetByTypeName(PlayerBodySlotViewsTypeName, "System.Collections.Generic.Dictionary<Var, Var>");
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+            end:
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "PointOfView";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                if (!PointOfViewOffset.Success)
+                {
+                    nestedStruct.AddOffset(name, PointOfViewOffset);
+                    goto end;
+                }
+
+                string PointOfViewTypeName = PointOfViewOffset.Value.TypeName.Replace("-.", "").Split('<')[0];
+
+                {
+                    entity = "POV";
+
+                    var offset = _dumpParser.FindOffsetByTypeName(PointOfViewTypeName, "Var");
                     nestedStruct.AddOffset(entity, offset);
                 }
 
