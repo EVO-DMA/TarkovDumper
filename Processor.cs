@@ -1185,6 +1185,17 @@ namespace TarkovDumper
                     nestedStruct.AddOffset(entity, offset);
                 }
 
+                {
+                    entity = "VisibleToCameraType";
+
+                    TypeDef foundClass = _dnlibHelper.FindClassByTypeName(className);
+                    MethodDef foundMethod = _dnlibHelper.FindMethodByName(foundClass, "get_VisibleToCameraType");
+                    FieldDef fField = _dnlibHelper.GetNthFieldReferencedByMethod(foundMethod);
+
+                    var offset = _dumpParser.FindOffsetByName(className, fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
                 structGenerator.AddStruct(nestedStruct);
             }
 
@@ -1724,6 +1735,72 @@ namespace TarkovDumper
                     entity = "PositionZeroSum";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "<ShotNeedsFovAdjustments>k__BackingField";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "_optics";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "MotionReact";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "SightNBone";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "ProceduralWeaponAnimation.SightNBone";
+
+                {
+                    entity = "Mod";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "MotionEffector";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                {
+                    entity = "_mouseProcessors";
+
+                    var offset = _dumpParser.FindOffsetByName(name, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "_movementProcessors";
+
+                    var offset = _dumpParser.FindOffsetByName(name, entity);
                     nestedStruct.AddOffset(entity, offset);
                 }
 
@@ -2946,6 +3023,13 @@ namespace TarkovDumper
                     nestedStruct.AddOffset(entity, offset);
                 }
 
+                {
+                    entity = "_magSlotCache";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
                 structGenerator.AddStruct(nestedStruct);
             }
 
@@ -4116,6 +4200,36 @@ namespace TarkovDumper
             {
                 const string name = "InventoryBlurDimensions";
                 const string typeName = "InventoryBlur.Dimensions";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "ECameraType";
+                const string typeName = "EFT.CameraControl.ECameraType";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "ColorType";
+                const string typeName = @"ColorType";
                 SetVariableStatus(name);
 
                 StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
