@@ -19,7 +19,14 @@ namespace TarkovDumper
         private readonly string _name = name;
         private readonly eStructureType _structureType = structureType;
 
-        private readonly List<string> _inlineEntries = new();
+        private readonly struct InlineEntry(string str, string stringSort, uint numericSort = uint.MaxValue)
+        {
+            public readonly string LineData = str;
+            public readonly string StringSort = stringSort;
+            public readonly uint NumericSort = numericSort;
+        }
+
+        private readonly List<InlineEntry> _inlineEntries = new();
         private readonly List<StructureGenerator> _nestedStructures = new();
 
         public int ClassesProcessed { get; private set; } = 0;
@@ -113,7 +120,7 @@ namespace TarkovDumper
             if (colorize)
                 output = ColorizeStringTemplate(output);
 
-            _inlineEntries.Add(output);
+            _inlineEntries.Add(new(output, name));
         }
 
         public void AddOffset(string name, DumpParser.Result<DumpParser.OffsetData> offsetData, bool colorize = true)
@@ -128,7 +135,7 @@ namespace TarkovDumper
                 if (colorize)
                     output = ColorizeOffsetTemplate(output);
 
-                _inlineEntries.Add(output);
+                _inlineEntries.Add(new(output, name, offsetData.Value.Offset));
 
                 OffsetsProcessed++;
             }
@@ -165,7 +172,7 @@ namespace TarkovDumper
             if (colorize)
                 output = ColorizeOffsetTemplate(output);
 
-            _inlineEntries.Add(output);
+            _inlineEntries.Add(new(output, name, offsetData[0].Value.Offset));
 
             OffsetsProcessed++;
         }
@@ -189,7 +196,10 @@ namespace TarkovDumper
                 if (colorize)
                     output = ColorizeEnumBodyTemplate(output);
 
-                _inlineEntries.Add(output);
+                if (uint.TryParse(field.Constant.Value.ToString(), out uint offset))
+                    _inlineEntries.Add(new(output, name, offset));
+                else
+                    _inlineEntries.Add(new(output, name));
             }
 
             EnumsProcessed++;
@@ -197,7 +207,7 @@ namespace TarkovDumper
 
         public void AddEmptyLine()
         {
-            _inlineEntries.Add("");
+            _inlineEntries.Add(new("", ""));
         }
 
         public void AddStruct(StructureGenerator nestedStruct)
@@ -219,7 +229,7 @@ namespace TarkovDumper
 
         public void AddError(string message)
         {
-            _inlineEntries.Add(Chalk.Red + ("// " + message));
+            _inlineEntries.Add(new(Chalk.Red + ("// " + message), ""));
         }
 
         public string ToString(bool colorize = true)
@@ -250,7 +260,15 @@ namespace TarkovDumper
                 AddError("No data!");
 
             bool linesAppended = false;
-            foreach (var constString in _inlineEntries)
+
+            // Sort entries
+            List<string> entries;
+            if (_structureType == eStructureType.Enum)
+                entries = _inlineEntries.OrderBy(x => x.NumericSort).Select(x => x.LineData).ToList();
+            else
+                entries = _inlineEntries.OrderBy(x => x.NumericSort).ThenBy(x => x.StringSort).Select(x => x.LineData).ToList();
+
+            foreach (var constString in entries)
             {
                 if (!colorize)
                     sb.AppendLine($"\t{TextHelper.CleanANSI(constString)}");
