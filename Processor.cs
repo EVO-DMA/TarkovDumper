@@ -331,15 +331,13 @@ namespace TarkovDumper
             }
 
             {
-                string name = "OpticCameraManagerContainer";
-                SetVariableStatus(name);
+                string entity = "get_OpticCameraManager";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
 
-                StructureGenerator nestedStruct = new(name);
+                StructureGenerator nestedStruct = new("OpticCameraManagerContainer");
 
-                string entity = "ApplyDovFovOnCamera";
-
-                var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Property);
-                nestedStruct.AddClassName(fClass, "ClassName", entity);
+                nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
 
                 structGenerator.AddStruct(nestedStruct);
             }
@@ -367,18 +365,6 @@ namespace TarkovDumper
                 nestedStruct.AddString("MethodName", entity);
 
                 nestedStruct.AddEmptyLine();
-
-                nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
-
-                structGenerator.AddStruct(nestedStruct);
-            }
-
-            {
-                string entity = "get_OpticCameraManager";
-                string variable = "ClassName";
-                SetVariableStatus(variable);
-
-                StructureGenerator nestedStruct = new("OpticCameraManagerContainer");
 
                 nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
 
