@@ -4037,6 +4037,110 @@ namespace TarkovDumper
 
                 structGenerator.AddStruct(nestedStruct);
             }
+
+            DumpParser.Result<DumpParser.OffsetData> GetOpticCameraManagerOffset = default;
+
+            {
+                string name = "OpticCameraManagerContainer";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                TypeDef fClass = _dnlibHelper.FindClassWithEntityName("get_OpticCameraManager", DnlibHelper.SearchType.Method);
+
+                {
+                    entity = "Instance";
+
+                    const string searchMethod = "get_Instance";
+                    MethodDef fMethod = _dnlibHelper.FindMethodByName(fClass, searchMethod);
+                    FieldDef fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "OpticCameraManager";
+
+                    const string searchMethod = "get_OpticCameraManager";
+                    MethodDef fMethod = _dnlibHelper.FindMethodByName(fClass, searchMethod);
+                    FieldDef fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+                    GetOpticCameraManagerOffset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, GetOpticCameraManagerOffset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "OpticCameraManager";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                if (!GetOpticCameraManagerOffset.Success)
+                {
+                    nestedStruct.AddOffset(name, GetOpticCameraManagerOffset);
+                    goto end;
+                }
+
+                string GetOpticCameraManagerTypeName = GetOpticCameraManagerOffset.Value.TypeName.Replace("-.", "");
+
+                TypeDef fClass = _dnlibHelper.FindClassByTypeName(GetOpticCameraManagerTypeName);
+
+                {
+                    entity = "Camera";
+
+                    const string searchMethod = "get_Camera";
+                    MethodDef fMethod = _dnlibHelper.FindMethodByName(fClass, searchMethod);
+                    FieldDef fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+                    GetOpticCameraManagerOffset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, GetOpticCameraManagerOffset);
+                }
+
+                {
+                    entity = "CurrentOpticSight";
+
+                    const string searchMethod = "get_CurrentOpticSight";
+                    MethodDef fMethod = _dnlibHelper.FindMethodByName(fClass, searchMethod);
+                    FieldDef fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+                    GetOpticCameraManagerOffset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, GetOpticCameraManagerOffset);
+                }
+
+            end:
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "OpticSight";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "EFT.CameraControl.OpticSight";
+
+                {
+                    entity = "LensRenderer";
+
+                    GPUInstancerManagerRuntimeDataListOffset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, GPUInstancerManagerRuntimeDataListOffset);
+                }
+
+                {
+                    entity = "OpticCullingMask";
+
+                    GPUInstancerManagerRuntimeDataListOffset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, GPUInstancerManagerRuntimeDataListOffset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
         }
 
         public void ProcessEnums(StatusContext ctx, StructureGenerator structGenerator)
