@@ -372,6 +372,18 @@ namespace TarkovDumper
 
                 structGenerator.AddStruct(nestedStruct);
             }
+
+            {
+                string entity = "get_OpticCameraManager";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("OpticCameraManagerContainer");
+
+                nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
         }
 
         public void ProcessOffsets(StatusContext ctx, StructureGenerator structGenerator)
