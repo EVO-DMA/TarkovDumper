@@ -4351,6 +4351,21 @@ namespace TarkovDumper
 
                 structGenerator.AddStruct(nestedStruct);
             }
+
+            {
+                const string name = "EquipmentSlot";
+                const string typeName = "EquipmentSlot";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
         }
     }
 }
