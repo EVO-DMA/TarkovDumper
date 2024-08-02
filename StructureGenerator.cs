@@ -7,8 +7,6 @@ namespace TarkovDumper
 {
     public sealed class StructureGenerator(string name, eStructureType structureType = eStructureType.Struct)
     {
-        private const bool EnumGeneratorsEnabled = true; // Requires NuGet package NetEscapades.EnumGenerators
-
         private const string namespaceTemplate = "namespace ${name}";
         private const string structTemplate = "public readonly struct ${name}";
         private const string stringTemplate = "public const string ${name} = @\"${value}\";";
@@ -241,9 +239,6 @@ namespace TarkovDumper
             }
             else if (structureType == eStructureType.Enum)
             {
-                if (EnumGeneratorsEnabled)
-                    sb.AppendLine(Chalk.Green + "[EnumExtensions]");
-
                 if (Flags)
                     sb.AppendLine(Chalk.Green + "[Flags]");
 
@@ -350,22 +345,10 @@ namespace TarkovDumper
 
             if (colorize)
             {
-                if (EnumGeneratorsEnabled)
-                {
-                    sb.AppendLine(Chalk.Blue + "using" + " NetEscapades.EnumGenerators;");
-                    sb.AppendLine();
-                }
-
                 sb.AppendLine(ColorizeNamespaceTemplate(InsertInTemplate(namespaceTemplate, "name", name)));
             }
             else
             {
-                if (EnumGeneratorsEnabled)
-                {
-                    sb.AppendLine("using NetEscapades.EnumGenerators;");
-                    sb.AppendLine();
-                }
-
                 sb.AppendLine(InsertInTemplate(namespaceTemplate, "name", name));
             }
 
