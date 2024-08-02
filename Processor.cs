@@ -56,9 +56,6 @@ namespace TarkovDumper
         {
             structGenerator.AddString("GameHostname", "prod.escapefromtarkov.com");
             structGenerator.AddString("LauncherHostname", "launcher.escapefromtarkov.com");
-
-            structGenerator.AddEmptyLine();
-
             structGenerator.AddString("UNITY_VERSION", "2019.4.39.7917901");
         }
 
@@ -109,8 +106,6 @@ namespace TarkovDumper
                 StructureGenerator nestedStruct = new("StreamerMode");
                 nestedStruct.AddString("MethodName", "IsLocalStreamer");
 
-                nestedStruct.AddEmptyLine();
-
                 nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
 
                 structGenerator.AddStruct(nestedStruct);
@@ -123,8 +118,6 @@ namespace TarkovDumper
 
                 StructureGenerator nestedStruct = new("FixWildSpawnType");
                 nestedStruct.AddString("MethodName", entity);
-
-                nestedStruct.AddEmptyLine();
 
                 nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
 
@@ -224,8 +217,6 @@ namespace TarkovDumper
                 StructureGenerator nestedStruct = new("EquipmentPenaltyComponent");
                 nestedStruct.AddString("ClassName", name + @"+\uE000");
 
-                nestedStruct.AddEmptyLine();
-
                 var fClass = _dnlibHelper.FindClassByTypeName(name);
                 var dClass = fClass.GetTypes().First();
 
@@ -268,8 +259,6 @@ namespace TarkovDumper
 
                 nestedStruct.AddMethodName("CanStartNewSearchOperation", "MethodName", "N/A");
 
-                nestedStruct.AddEmptyLine();
-
                 string entity = "CanStartNewSearchOperation";
                 var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method);
                 nestedStruct.AddClassName(fClass, "ClassName", entity);
@@ -300,8 +289,6 @@ namespace TarkovDumper
 
                 nestedStruct.AddMethodName(entity, "MethodName", "N/A");
 
-                nestedStruct.AddEmptyLine();
-
                 var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method);
                 nestedStruct.AddClassName(fClass, "ClassName", entity, true);
 
@@ -321,8 +308,6 @@ namespace TarkovDumper
                 nestedStruct.AddMethodName(entity1, "KeybindFromAnywhereMethodA", "N/A");
                 nestedStruct.AddMethodName(entity2, "KeybindFromAnywhereMethodB", "N/A");
                 nestedStruct.AddMethodName(entity3, "ShowOwnDogTagMethod", "N/A");
-
-                nestedStruct.AddEmptyLine();
 
                 var fClass = _dnlibHelper.FindClassWithEntityName(entity1, DnlibHelper.SearchType.Method);
                 nestedStruct.AddClassName(fClass, "ClassName", entity1);
@@ -363,8 +348,6 @@ namespace TarkovDumper
 
                 StructureGenerator nestedStruct = new("FovChanger");
                 nestedStruct.AddString("MethodName", entity);
-
-                nestedStruct.AddEmptyLine();
 
                 nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
 
@@ -4068,6 +4051,16 @@ namespace TarkovDumper
                     nestedStruct.AddOffset(entity, GetOpticCameraManagerOffset);
                 }
 
+                {
+                    entity = "FPSCamera";
+
+                    const string searchMethod = "get_Camera";
+                    MethodDef fMethod = _dnlibHelper.FindMethodByName(fClass, searchMethod);
+                    FieldDef fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
                 structGenerator.AddStruct(nestedStruct);
             }
 
@@ -4331,7 +4324,22 @@ namespace TarkovDumper
 
             {
                 const string name = "ColorType";
-                const string typeName = @"ColorType";
+                const string typeName = "ColorType";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "EWeaponModType";
+                const string typeName = "EWeaponModType";
                 SetVariableStatus(name);
 
                 StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);

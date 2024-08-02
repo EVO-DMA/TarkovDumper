@@ -1,13 +1,14 @@
 ﻿using dnlib.DotNet;
 using Kokuban;
 using System.Text;
-using System.Text.RegularExpressions;
 using static TarkovDumper.StructureGenerator;
 
 namespace TarkovDumper
 {
     public sealed class StructureGenerator(string name, eStructureType structureType = eStructureType.Struct)
     {
+        private const bool EnumGeneratorsEnabled = true; // Requires NuGet package NetEscapades.EnumGenerators
+
         private const string namespaceTemplate = "namespace ${name}";
         private const string structTemplate = "public readonly struct ${name}";
         private const string stringTemplate = "public const string ${name} = @\"${value}\";";
@@ -205,11 +206,6 @@ namespace TarkovDumper
             EnumsProcessed++;
         }
 
-        public void AddEmptyLine()
-        {
-            _inlineEntries.Add(new("", ""));
-        }
-
         public void AddStruct(StructureGenerator nestedStruct)
         {
             _nestedStructures.Add(nestedStruct);
@@ -245,6 +241,9 @@ namespace TarkovDumper
             }
             else if (structureType == eStructureType.Enum)
             {
+                if (EnumGeneratorsEnabled)
+                    sb.AppendLine(Chalk.Green + "[EnumExtensions]");
+
                 if (Flags)
                     sb.AppendLine(Chalk.Green + "[Flags]");
 
@@ -350,9 +349,25 @@ namespace TarkovDumper
             var sb = new StringBuilder();
 
             if (colorize)
+            {
+                if (EnumGeneratorsEnabled)
+                {
+                    sb.AppendLine(Chalk.Blue + "using" + " NetEscapades.EnumGenerators;");
+                    sb.AppendLine();
+                }
+
                 sb.AppendLine(ColorizeNamespaceTemplate(InsertInTemplate(namespaceTemplate, "name", name)));
+            }
             else
+            {
+                if (EnumGeneratorsEnabled)
+                {
+                    sb.AppendLine("using NetEscapades.EnumGenerators;");
+                    sb.AppendLine();
+                }
+
                 sb.AppendLine(InsertInTemplate(namespaceTemplate, "name", name));
+            }
 
             sb.AppendLine("{");
 

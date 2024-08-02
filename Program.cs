@@ -1,4 +1,5 @@
 ﻿using Spectre.Console;
+using System.Diagnostics;
 
 namespace TarkovDumper
 {
@@ -115,6 +116,9 @@ namespace TarkovDumper
 
                     string plainSDK = StructureGenerator.GenerateNamespace("SDK", sgList, false);
                     File.WriteAllText(sdkOutputPath, plainSDK);
+
+                    // Show it in explorer
+                    Process.Start("explorer.exe", $"/select,\"{sdkOutputPath}\"");
                 }
                 catch (Exception ex)
                 {
