@@ -201,7 +201,7 @@ namespace TarkovDumper
 
                 var fClass = _dnlibHelper.FindClassWithEntityName(name, DnlibHelper.SearchType.Property);
 
-                structGenerator.AddClassName(fClass, cVariable, name);
+                structGenerator.AddClassName(fClass, cVariable, name, true);
 
                 SetVariableStatus(mVariable);
                 var fMethod = _decompiler.DecompileClassMethod(fClass, entity);
@@ -310,7 +310,7 @@ namespace TarkovDumper
                 nestedStruct.AddMethodName(entity3, "ShowOwnDogTagMethod", "N/A");
 
                 var fClass = _dnlibHelper.FindClassWithEntityName(entity1, DnlibHelper.SearchType.Method);
-                nestedStruct.AddClassName(fClass, "ClassName", entity1);
+                nestedStruct.AddClassName(fClass, "ClassName", entity1, true);
 
                 structGenerator.AddStruct(nestedStruct);
             }
@@ -622,13 +622,6 @@ namespace TarkovDumper
 
                 {
                     entity = "GroundColor";
-
-                    var offset = _dumpParser.FindOffsetByName(name, entity);
-                    nestedStruct.AddOffset(entity, offset);
-                }
-
-                {
-                    entity = "HeightFalloff";
 
                     var offset = _dumpParser.FindOffsetByName(name, entity);
                     nestedStruct.AddOffset(entity, offset);
@@ -1067,10 +1060,15 @@ namespace TarkovDumper
 
                 string entity;
 
-                {
-                    entity = "<IsAI>k__BackingField";
+                var fClass = _dnlibHelper.FindClassWithEntityName("get_FlarePower", DnlibHelper.SearchType.Method, true);
 
-                    var offset = _dumpParser.FindOffsetByName(name, entity);
+                {
+                    entity = "IsAI";
+
+                    MethodDef fMethod = _dnlibHelper.FindMethodByName(fClass, "get_IsAI");
+                    var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
                     nestedStruct.AddOffset(entity, offset);
                 }
 
@@ -2682,15 +2680,12 @@ namespace TarkovDumper
 
                 string entity;
 
-                var inventoryController = _dnlibHelper.FindClassWithEntityName("SortingTableActive", DnlibHelper.SearchType.Property);
+                const string className = "Player.PlayerInventoryController";
 
                 {
-                    entity = "Inventory";
+                    entity = "<Inventory>k__BackingField";
 
-                    var fMethod = _dnlibHelper.FindMethodByName(inventoryController, "get_Inventory");
-                    var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
-
-                    var offset = _dumpParser.FindOffsetByName(inventoryController.Humanize(), fField.GetFieldName());
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
                 }
 
@@ -2757,7 +2752,7 @@ namespace TarkovDumper
                 const string className = "EFT.InventoryLogic.Slot";
 
                 {
-                    entity = "Id";
+                    entity = "<ID>k__BackingField";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
@@ -3123,7 +3118,7 @@ namespace TarkovDumper
                 }
 
                 {
-                    entity = "_id";
+                    entity = "<_id>k__BackingField";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
@@ -4115,8 +4110,8 @@ namespace TarkovDumper
                     const string searchMethod = "get_Camera";
                     MethodDef fMethod = _dnlibHelper.FindMethodByName(fClass, searchMethod);
                     FieldDef fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
-                    GetOpticCameraManagerOffset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
-                    nestedStruct.AddOffset(entity, GetOpticCameraManagerOffset);
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
                 }
 
                 {
@@ -4125,8 +4120,8 @@ namespace TarkovDumper
                     const string searchMethod = "get_CurrentOpticSight";
                     MethodDef fMethod = _dnlibHelper.FindMethodByName(fClass, searchMethod);
                     FieldDef fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
-                    GetOpticCameraManagerOffset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
-                    nestedStruct.AddOffset(entity, GetOpticCameraManagerOffset);
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
                 }
 
             end:
@@ -4146,15 +4141,35 @@ namespace TarkovDumper
                 {
                     entity = "LensRenderer";
 
-                    GPUInstancerManagerRuntimeDataListOffset = _dumpParser.FindOffsetByName(className, entity);
-                    nestedStruct.AddOffset(entity, GPUInstancerManagerRuntimeDataListOffset);
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
                 }
 
                 {
                     entity = "OpticCullingMask";
 
-                    GPUInstancerManagerRuntimeDataListOffset = _dumpParser.FindOffsetByName(className, entity);
-                    nestedStruct.AddOffset(entity, GPUInstancerManagerRuntimeDataListOffset);
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "MongoID";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "EFT.MongoID";
+
+                {
+                    entity = "_stringID";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
                 }
 
                 structGenerator.AddStruct(nestedStruct);

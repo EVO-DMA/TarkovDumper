@@ -23,7 +23,7 @@ namespace TarkovDumper
         /// <summary>
         /// Finds a class that contains the given entity of a specific type.
         /// </summary>
-        public TypeDef FindClassWithEntityName(string entityName, SearchType searchType)
+        public TypeDef FindClassWithEntityName(string entityName, SearchType searchType, bool mustReferenceField = false)
         {
             foreach (TypeDef type in _module.GetTypes())
             {
@@ -42,7 +42,12 @@ namespace TarkovDumper
                     case SearchType.Method:
                         foreach (MethodDef method in type.Methods)
                             if (method.Name == entityName)
+                            {
+                                if (mustReferenceField && GetNthFieldReferencedByMethod(method) == null)
+                                    continue;
+
                                 return type;
+                            }
                         break;
                     default:
                         break;

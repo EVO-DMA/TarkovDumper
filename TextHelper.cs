@@ -34,7 +34,12 @@ namespace TarkovDumper
                 throw new ArgumentException($"fullName: \"{fullName}\" is obfuscated! {additionalHelpInfo}");
 
             if (!fullName.Contains('/'))
-                throw new ArgumentException($"fullName: \"{fullName}\" does not contain a \"/\" char! {additionalHelpInfo}");
+            {
+                if (!fullName.Contains('.'))
+                    throw new ArgumentException($"fullName: \"{fullName}\" does not contain a \"/\" char! {additionalHelpInfo}");
+                else
+                    return fullName;
+            }
 
             string[] splitName = fullName.Split('/');
 
