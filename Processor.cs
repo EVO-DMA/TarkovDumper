@@ -353,6 +353,18 @@ namespace TarkovDumper
 
                 structGenerator.AddStruct(nestedStruct);
             }
+
+            {
+                string entity = "get_DefaultLanguage";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("LocaleManager");
+                var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method);
+                nestedStruct.AddClassName(fClass, "ClassName", entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
         }
 
         public void ProcessOffsets(StatusContext ctx, StructureGenerator structGenerator)
@@ -428,6 +440,8 @@ namespace TarkovDumper
                 structGenerator.AddStruct(nestedStruct);
             }
 
+            DumpParser.Result<DumpParser.OffsetData> TransitControllerOffset = default;
+
             {
                 string name = "ClientLocalGameWorld";
                 SetVariableStatus(name);
@@ -448,6 +462,25 @@ namespace TarkovDumper
 
                     string className = _dumpParser.FindOffsetGroupWithEntities(searchEntities);
                     var offset = _dumpParser.FindOffsetByTypeName(name, className);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "TransitController";
+
+                    var fClass = _dnlibHelper.FindClassWithEntityName("DisableTransitPoints", DnlibHelper.SearchType.Method);
+                    TransitControllerOffset = _dumpParser.FindOffsetByTypeName(name, $"-.{fClass.Humanize()}");
+                    nestedStruct.AddOffset(entity, TransitControllerOffset);
+                }
+
+                {
+                    entity = "SynchronizableObjectLogicProcessor";
+
+                    var fClass = _dnlibHelper.FindClassWithEntityName("GetAlivePlayerByProfileID", DnlibHelper.SearchType.Method);
+                    var fMethod = _dnlibHelper.FindMethodByName(fClass, "get_SynchronizableObjectLogicProcessor");
+                    var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+
+                    var offset = _dumpParser.FindOffsetByName(name, fField.GetFieldName());
                     nestedStruct.AddOffset(entity, offset);
                 }
 
@@ -509,6 +542,169 @@ namespace TarkovDumper
                     string fieldName = TextHelper.FindSubstringAndGoBackwards(decompiled.Body, searchString);
 
                     var offset = _dumpParser.FindOffsetByName(name, fieldName);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "TransitController";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                if (!TransitControllerOffset.Success)
+                {
+                    nestedStruct.AddOffset(name, TransitControllerOffset);
+                    goto end;
+                }
+
+                {
+                    entity = "TransitPoints";
+
+                    var offset = _dumpParser.FindOffsetByTypeName(TransitControllerOffset.Value.TypeName, "System.Collections.Generic.Dictionary<Int32, TransitPoint>");
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+            end:
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            DumpParser.Result<DumpParser.OffsetData> TransitPointOffset = default;
+
+            {
+                string name = "TransitPoint";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "EFT.Interactive.TransitPoint";
+
+                {
+                    entity = "parameters";
+
+                    TransitPointOffset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, TransitPointOffset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "TransitParameters";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                if (!TransitPointOffset.Success)
+                {
+                    nestedStruct.AddOffset(name, TransitPointOffset);
+                    goto end;
+                }
+
+                {
+                    entity = "name";
+
+                    var offset = _dumpParser.FindOffsetByName(TransitPointOffset.Value.TypeName, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "description";
+
+                    var offset = _dumpParser.FindOffsetByName(TransitPointOffset.Value.TypeName, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+            end:
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "SynchronizableObject";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "EFT.SynchronizableObjects.SynchronizableObject";
+
+                {
+                    entity = "Type";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "SynchronizableObjectLogicProcessor";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                {
+                    entity = "SynchronizableObjects";
+
+                    var fClass = _dnlibHelper.FindClassWithEntityName("GetSyncObjectStrategyByType", DnlibHelper.SearchType.Method);
+
+                    var decompiled = _decompiler.DecompileClassMethod(fClass, "InitStaticObject");
+                    string fField = TextHelper.FindSubstringAndGoBackwards(decompiled.Body, ".Add", '.');
+
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "TripwireSynchronizableObject";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "EFT.SynchronizableObjects.TripwireSynchronizableObject";
+
+                {
+                    entity = "_tripwireState";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "<GrenadeTemplateId>k__BackingField";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "<FromPosition>k__BackingField";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "<ToPosition>k__BackingField";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
                 }
 
@@ -2613,6 +2809,13 @@ namespace TarkovDumper
                     nestedStruct.AddOffset(entity, offset);
                 }
 
+                {
+                    entity = "_movementStates";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
                 structGenerator.AddStruct(nestedStruct);
             }
 
@@ -2634,9 +2837,41 @@ namespace TarkovDumper
                 }
 
                 {
+                    entity = "AnimatorStateHash";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
                     entity = "StickToGround";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "PlayerStateContainer";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                {
+                    entity = "Name";
+
+                    var offset = _dumpParser.FindOffsetByName(name, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "StateFullNameHash";
+
+                    var offset = _dumpParser.FindOffsetByName(name, entity);
                     nestedStruct.AddOffset(entity, offset);
                 }
 
@@ -2816,6 +3051,13 @@ namespace TarkovDumper
 
                     LootableContainerItemOwnerOffset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, LootableContainerItemOwnerOffset);
+                }
+
+                {
+                    entity = "Template";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
                 }
 
                 structGenerator.AddStruct(nestedStruct);
@@ -4174,6 +4416,71 @@ namespace TarkovDumper
 
                 structGenerator.AddStruct(nestedStruct);
             }
+
+            {
+                string name = "LocaleManager";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                var fClass = _dnlibHelper.FindClassWithEntityName("get_DefaultLanguage", DnlibHelper.SearchType.Method);
+
+                {
+                    entity = "Instance";
+
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, fClass, $"new {fClass.Humanize()}()");
+                    var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "LocaleDictionary";
+
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, fClass, "mainFallBack.atlasPopulationMode");
+                    var decompiled = _decompiler.DecompileClassMethod(fClass, fMethod.Humanize());
+                    int start = decompiled.Body.IndexOf("mainFallBack.atlasPopulationMode");
+                    int end = decompiled.Body.IndexOf(".TryGetValue", start);
+                    string fField = TextHelper.FindSubstringAndGoBackwards(decompiled.Body, null, '.', end);
+
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "CurrentCulture";
+
+                    var decompiled = _decompiler.DecompileClassMethods(fClass);
+                    string getter = null;
+                    foreach (var method in decompiled)
+                    {
+                        int startIndex = method.Body.IndexOf("id, \\ue");
+                        if (startIndex == -1)
+                            continue;
+
+                        int endIndex = method.Body.IndexOf(");", startIndex);
+                        if (endIndex == -1)
+                            continue;
+
+                        getter = method.Body.Substring(startIndex, endIndex - startIndex).Split(",")[1].Trim();
+                        break;
+                    }
+
+                    if (getter != null)
+                    {
+                        var fMethod = _dnlibHelper.FindMethodByName(fClass, $"get_{getter}");
+
+                        FieldDef fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+                        var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
+                        nestedStruct.AddOffset(entity, offset);
+                    }
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
         }
 
         public void ProcessEnums(StatusContext ctx, StructureGenerator structGenerator)
@@ -4412,6 +4719,51 @@ namespace TarkovDumper
             {
                 const string name = "EFireMode";
                 const string typeName = "EFireMode";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "SynchronizableObjectType";
+                const string typeName = "SynchronizableObjectType";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "ETripwireState";
+                const string typeName = "ETripwireState";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);
+
+                var eType = _dnlibHelper.FindEnumByTypeName(typeName);
+                var eFields = _dnlibHelper.GetEnumValues(eType);
+
+                nestedStruct.AddEnum(eFields);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                const string name = "EQuestStatus";
+                const string typeName = "EQuestStatus";
                 SetVariableStatus(name);
 
                 StructureGenerator nestedStruct = new(name, StructureGenerator.eStructureType.Enum);

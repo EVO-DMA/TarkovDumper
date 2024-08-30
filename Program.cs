@@ -11,8 +11,10 @@ namespace TarkovDumper
         private const string DefaultAssemblyPath = @"Z:\Assembly-CSharp.dll";
         private const string DefaultDumpPath = @"C:\Users\microPower\Documents\GitHub\UnispectEx\Unispect\bin\Release\dump.txt";
 #else
-        private const string DefaultAssemblyPath = @"C:\Battlestate Games\Escape from Tarkov\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll";
-        private const string DefaultDumpPath = null;
+        //private const string DefaultAssemblyPath = @"C:\Battlestate Games\Escape from Tarkov\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll";
+        //private const string DefaultDumpPath = null;
+        private const string DefaultAssemblyPath = @"Z:\Assembly-CSharp.dll";
+        private const string DefaultDumpPath = @"C:\Users\microPower\Documents\GitHub\UnispectEx\Unispect\bin\Release\dump.txt";
 #endif
 
         static void Main(string[] args)

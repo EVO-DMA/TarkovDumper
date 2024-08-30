@@ -22,7 +22,36 @@ namespace TarkovDumper
                 throw new ArgumentException("Input string is too short.", nameof(name));
 
             return $"\\u{BitConverter.ToUInt16(utf16Bytes):X4}";
+        }
 
+        private static string UTF8ToUTF16_Alt(string name)
+        {
+            if (name == null || name.Length <= 0)
+                return null;
+
+            int startIndex = -1;
+            Span<byte> nameBytes = Encoding.UTF8.GetBytes(name);
+            for (int i = 0; i < nameBytes.Length; i++)
+            {
+                if (nameBytes[i] >= 0xE0)
+                {
+                    startIndex = i;
+                    break;
+                }
+            }
+
+            // Exit early if this name is not obfuscated at all
+            if (startIndex == -1)
+                return name;
+
+            ReadOnlySpan<char> nameSpan = name.AsSpan().Slice(startIndex);
+            Span<byte> utf16Bytes = stackalloc byte[2 * nameSpan.Length];
+
+            var byteCount = Encoding.Unicode.GetBytes(nameSpan, utf16Bytes);
+            if (byteCount < 2)
+                throw new Exception("The supplied name is too short");
+
+            return $"{name.Substring(0, startIndex)}\\u{BitConverter.ToUInt16(utf16Bytes):X4}";
         }
 
         private static string GetFullName(string fullName)
@@ -55,6 +84,14 @@ namespace TarkovDumper
             else return UTF8ToUTF16(typeDef.Name);
         }
 
+        public static string HumanizeAlt(this TypeDef typeDef)
+        {
+            if (typeDef == null)
+                return null;
+
+            return UTF8ToUTF16_Alt(typeDef.Name);
+        }
+
         public static string Humanize(this MethodDef typeDef, bool fullName = false)
         {
             if (typeDef == null)
@@ -64,6 +101,14 @@ namespace TarkovDumper
             else return UTF8ToUTF16(typeDef.Name);
         }
 
+        public static string HumanizeAlt(this MethodDef typeDef)
+        {
+            if (typeDef == null)
+                return null;
+
+            return UTF8ToUTF16_Alt(typeDef.Name);
+        }
+
         public static string Humanize(this FieldDef typeDef, bool fullName = false)
         {
             if (typeDef == null)
@@ -71,6 +116,14 @@ namespace TarkovDumper
 
             if (fullName) return UTF8ToUTF16(typeDef.FullName).Replace('/', '.');
             else return UTF8ToUTF16(typeDef.Name);
+        }
+
+        public static string HumanizeAlt(this FieldDef typeDef)
+        {
+            if (typeDef == null)
+                return null;
+
+            return UTF8ToUTF16_Alt(typeDef.Name);
         }
 
         public static string Humanize(this string name)
@@ -97,9 +150,11 @@ namespace TarkovDumper
         /// <summary>
         /// Finds a substring then goes backwards until white space is found.
         /// </summary>
-        public static string FindSubstringAndGoBackwards(string input, string substring)
+        public static string FindSubstringAndGoBackwards(string input, string substring, int startIndex = -1)
         {
-            int startIndex = input.IndexOf(substring);
+            if (startIndex == -1)
+                startIndex = input.IndexOf(substring);
+
             if (startIndex == -1)
                 return null;
 
@@ -116,9 +171,11 @@ namespace TarkovDumper
         /// <summary>
         /// Finds a substring then goes backwards until the searchChar is reached.
         /// </summary>
-        public static string FindSubstringAndGoBackwards(string input, string substring, char searchChar)
+        public static string FindSubstringAndGoBackwards(string input, string substring, char searchChar, int startIndex = -1)
         {
-            int startIndex = input.IndexOf(substring);
+            if (startIndex == -1)
+                startIndex = input.IndexOf(substring);
+
             if (startIndex == -1)
                 return null;
 

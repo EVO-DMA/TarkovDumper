@@ -179,8 +179,12 @@ namespace TarkovDumper
 
             foreach (var method in type.Methods)
             {
-                if (method.Humanize() == methodName)
+                const StringComparison sc = StringComparison.OrdinalIgnoreCase;
+                if (method.Humanize().Equals(methodName, sc) ||
+                    method.HumanizeAlt().Equals(methodName, sc))
+                {
                     return method;
+                }
             }
 
             return null;
