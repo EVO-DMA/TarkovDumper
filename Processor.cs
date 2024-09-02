@@ -2125,6 +2125,7 @@ namespace TarkovDumper
 
             DumpParser.Result<DumpParser.OffsetData> ProfileStatsOffset = default;
             DumpParser.Result<DumpParser.OffsetData> ProfileInfoOffset = default;
+            DumpParser.Result<DumpParser.OffsetData> ProfileTaskConditionCountersOffset = default;
             DumpParser.Result<DumpParser.OffsetData> ProfileQuestDataOffset = default;
 
             {
@@ -2163,6 +2164,13 @@ namespace TarkovDumper
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "TaskConditionCounters";
+
+                    ProfileTaskConditionCountersOffset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, ProfileTaskConditionCountersOffset);
                 }
 
                 {
@@ -2492,6 +2500,48 @@ namespace TarkovDumper
                 structGenerator.AddStruct(nestedStruct);
             }
 
+            {
+                string name = "ProfileTaskConditionCounter";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                if (!ProfileTaskConditionCountersOffset.Success)
+                {
+                    nestedStruct.AddOffset(name, ProfileTaskConditionCountersOffset);
+                    goto end;
+                }
+
+                string ProfileTaskConditionCountersTypeName = ProfileTaskConditionCountersOffset.Value.TypeName.Split(',')[1].Trim().TrimEnd('>');
+
+                var fClass = _dnlibHelper.FindClassByTypeName(ProfileTaskConditionCountersTypeName);
+
+                {
+                    entity = "Id";
+
+                    var fMethod = _dnlibHelper.FindMethodByName(fClass, "get_Id");
+                    var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+
+                    var offset = _dumpParser.FindOffsetByName(ProfileTaskConditionCountersTypeName, fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "Value";
+
+                    var fMethod = _dnlibHelper.FindMethodByName(fClass, "get_Value");
+                    var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+
+                    var offset = _dumpParser.FindOffsetByName(ProfileTaskConditionCountersTypeName, fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+            end:
+                structGenerator.AddStruct(nestedStruct);
+            }
+
             DumpParser.Result<DumpParser.OffsetData> QuestTemplateOffset = default;
 
             {
@@ -2509,17 +2559,28 @@ namespace TarkovDumper
                 }
 
                 string QuestDataTemplateTypeName = QuestDataTemplateOffset.Value.TypeName.Replace("-.", "");
+                var fClass = _dnlibHelper.FindClassByTypeName(QuestDataTemplateTypeName);
 
                 {
                     entity = "Conditions";
 
-                    var fClass = _dnlibHelper.FindClassByTypeName(QuestDataTemplateTypeName);
                     var fMethod = _dnlibHelper.FindMethodByName(fClass, "get_Conditions");
                     var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
 
                     QuestTemplateOffset = _dumpParser.FindOffsetByName(QuestDataTemplateTypeName, fField.GetFieldName());
 
                     nestedStruct.AddOffset(entity, QuestTemplateOffset);
+                }
+
+                {
+                    entity = "Name";
+
+                    var fMethod = _dnlibHelper.FindMethodByName(fClass, "get_NameLocaleKey");
+                    var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+
+                    var offset = _dumpParser.FindOffsetByName(QuestDataTemplateTypeName, fField.GetFieldName());
+
+                    nestedStruct.AddOffset(entity, offset);
                 }
 
             end:
@@ -2590,6 +2651,26 @@ namespace TarkovDumper
             }
 
             {
+                string name = "QuestConditionItem";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "EFT.Quests.ConditionItem";
+
+                {
+                    entity = "<value>k__BackingField";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
                 string name = "QuestConditionFindItem";
                 SetVariableStatus(name);
 
@@ -2620,7 +2701,27 @@ namespace TarkovDumper
                 const string className = "EFT.Quests.ConditionCounterCreator";
 
                 {
-                    entity = "_templateConditions";
+                    entity = "<Conditions>k__BackingField";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "QuestConditionVisitPlace";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "EFT.Quests.ConditionVisitPlace";
+
+                {
+                    entity = "target";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
@@ -2641,6 +2742,13 @@ namespace TarkovDumper
 
                 {
                     entity = "zoneId";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "plantTime";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
@@ -2946,6 +3054,20 @@ namespace TarkovDumper
                     nestedStruct.AddOffset(entity, InventoryEquipmentOffset);
                 }
 
+                {
+                    entity = "QuestRaidItems";
+
+                    InventoryEquipmentOffset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, InventoryEquipmentOffset);
+                }
+
+                {
+                    entity = "QuestStashItems";
+
+                    InventoryEquipmentOffset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, InventoryEquipmentOffset);
+                }
+
                 structGenerator.AddStruct(nestedStruct);
             }
 
@@ -2964,6 +3086,13 @@ namespace TarkovDumper
                 }
 
                 string InventoryEquipmentTypeName = InventoryEquipmentOffset.Value.TypeName.Replace("-.", "");
+
+                {
+                    entity = "Grids";
+
+                    var offset = _dumpParser.FindOffsetByName(InventoryEquipmentTypeName, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
 
                 {
                     entity = "Slots";
