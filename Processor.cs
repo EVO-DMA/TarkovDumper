@@ -2958,6 +2958,13 @@ namespace TarkovDumper
                     nestedStruct.AddOffset(entity, offset);
                 }
 
+                {
+                    entity = "PlantTime";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
                 structGenerator.AddStruct(nestedStruct);
             }
 
