@@ -48,27 +48,12 @@ namespace TarkovDumper
             Enum,
         }
 
-        public void AddClassName(TypeDef typeDef, string variable, string entity, bool outputFullName = false)
+        public void AddClassName(TypeDef typeDef, string variable, string entity, bool outputFullName = false, bool outputFullNameAlt = false)
         {
             if (typeDef != null)
             {
-                AddString(variable, typeDef.Humanize(outputFullName));
-
-                ClassesProcessed++;
-            }
-            else
-            {
-                AddError($"[ERROR] Unable to find: \"{variable}\" using entity: \"{entity}\"!");
-
-                ClassesErrored++;
-            }
-        }
-
-        public void AddClassName(string className, string variable, string entity)
-        {
-            if (className != null)
-            {
-                AddString(variable, className);
+                AddString(variable, outputFullNameAlt ? typeDef.HumanizeAlt(outputFullName) : typeDef.Humanize(outputFullName));
+                AddOffset($"{variable}_ClassToken", new(true, new($"{variable}_ClassToken", "MDToken", typeDef.MDToken.Raw)));
 
                 ClassesProcessed++;
             }
@@ -85,22 +70,7 @@ namespace TarkovDumper
             if (methodDef != null)
             {
                 AddString(variable, methodDef.Humanize());
-
-                MethodsProcessed++;
-            }
-            else
-            {
-                AddError($"[ERROR] Unable to find: \"{variable}\" using entity: \"{entity}\"!");
-
-                MethodsErrored++;
-            }
-        }
-
-        public void AddMethodName(string methodName, string variable, string entity)
-        {
-            if (methodName != null)
-            {
-                AddString(variable, methodName);
+                AddOffset($"{variable}_MethodToken", new(true, new($"{variable}_MethodToken", "MDToken", methodDef.MDToken.Raw)));
 
                 MethodsProcessed++;
             }

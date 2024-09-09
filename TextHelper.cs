@@ -84,12 +84,13 @@ namespace TarkovDumper
             else return UTF8ToUTF16(typeDef.Name);
         }
 
-        public static string HumanizeAlt(this TypeDef typeDef)
+        public static string HumanizeAlt(this TypeDef typeDef, bool fullName = false)
         {
             if (typeDef == null)
                 return null;
 
-            return UTF8ToUTF16_Alt(typeDef.Name);
+            if (fullName) return GetFullName(UTF8ToUTF16_Alt(typeDef.FullName));
+            else return UTF8ToUTF16_Alt(typeDef.Name);
         }
 
         public static string Humanize(this MethodDef typeDef, bool fullName = false)

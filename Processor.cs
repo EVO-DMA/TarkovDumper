@@ -7,7 +7,8 @@ namespace TarkovDumper
     public sealed class Processor
     {
         private readonly ModuleDefMD _module;
-        private readonly Decompiler _decompiler;
+        private readonly Decompiler _decompiler_Basic;
+        private readonly Decompiler _decompiler_Async;
         private readonly DnlibHelper _dnlibHelper;
         private readonly DumpParser _dumpParser;
 
@@ -27,12 +28,20 @@ namespace TarkovDumper
 
             try
             {
-                CSharpDecompiler CSharpDecompiler = new(assemblyPath, new()
+                CSharpDecompiler CSharpDecompiler_basic = new(assemblyPath, new()
+                {
+                    AnonymousMethods = false,
+                    ThrowOnAssemblyResolveErrors = false,
+                    AsyncAwait = false,
+                });
+                _decompiler_Basic = new(CSharpDecompiler_basic);
+
+                CSharpDecompiler CSharpDecompiler_async = new(assemblyPath, new()
                 {
                     AnonymousMethods = false,
                     ThrowOnAssemblyResolveErrors = false,
                 });
-                _decompiler = new(CSharpDecompiler);
+                _decompiler_Async = new(CSharpDecompiler_async);
             }
             catch (Exception ex)
             {
@@ -85,7 +94,7 @@ namespace TarkovDumper
                 var fClass = _dnlibHelper.FindClassWithEntities(searchEntities);
 
                 // Decompile the "Create" method
-                var fMethod = _decompiler.DecompileClassMethod(fClass, "Create");
+                var fMethod = _decompiler_Basic.DecompileClassMethod(fClass, "Create");
 
                 // Get the default param value that contains the game version
                 int startIndex = fMethod.Body.IndexOf('"') + 1;
@@ -126,88 +135,139 @@ namespace TarkovDumper
 
             {
                 string entity = "EmptyResponseRepeatDelay";
-                string variable = "NetworkContainerName";
+                string variable = "ClassName";
                 SetVariableStatus(variable);
 
-                structGenerator.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Property), variable, entity);
+                StructureGenerator nestedStruct = new("NetworkContainer");
+
+                nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Property), variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
             }
 
             {
                 string entity = "UpdateTradersSettings";
-                string variable = "InertiaSettingsName";
+                string variable = "ClassName";
                 SetVariableStatus(variable);
 
-                structGenerator.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
+                StructureGenerator nestedStruct = new("InertiaSettings");
+
+                nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
             }
 
             {
                 string entity = "UpdateMergedControls";
-                string variable = "GameSettingsName";
+                string variable = "ClassName";
                 SetVariableStatus(variable);
 
-                structGenerator.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
+                StructureGenerator nestedStruct = new("GameSettings");
+
+                nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
             }
 
             {
                 string entity = "LastSucceedResponse";
-                string variable = "GameAPIClient";
+                string variable = "ClassName";
                 SetVariableStatus(variable);
 
-                structGenerator.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Property), variable, entity);
+                StructureGenerator nestedStruct = new("GameAPIClient");
+
+                nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Property), variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
             }
 
             {
                 string name = "EFT.InventoryLogic.DogtagComponent";
                 string entity = "Nickname";
-                string variable = "DogtagNicknameMethod";
+                string variable = "MethodName";
                 SetVariableStatus(variable);
 
-                var fClass = _dnlibHelper.FindClassByTypeName(name);
-                var fMethod = _dnlibHelper.FindMethodThatReturns(_decompiler, fClass, entity);
+                StructureGenerator nestedStruct = new("DogtagComponent");
 
-                structGenerator.AddMethodName(fMethod, variable, entity);
+                var fClass = _dnlibHelper.FindClassByTypeName(name);
+                var fMethod = _dnlibHelper.FindMethodThatReturns(_decompiler_Basic, fClass, entity);
+
+                nestedStruct.AddMethodName(fMethod, variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
             }
 
             {
                 string name = "EFT.UI.DragAndDrop.GridItemView";
                 string entity = "itemComponent.Nickname.SubstringIfNecessary";
-                string variable = "InventoryGridDogtagNameMethod";
+                string variable = "MethodName";
                 SetVariableStatus(variable);
 
-                var fClass = _dnlibHelper.FindClassByTypeName(name);
-                var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, fClass, entity);
+                StructureGenerator nestedStruct = new("GridItemView");
 
-                structGenerator.AddMethodName(fMethod, variable, entity);
+                var fClass = _dnlibHelper.FindClassByTypeName(name);
+                var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, fClass, entity);
+
+                nestedStruct.AddMethodName(fMethod, variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
             }
 
             {
                 string name = "StopAfkMonitor";
-                string variable = "AFKMonitorClass";
+                string variable = "ClassName";
                 SetVariableStatus(variable);
 
-                var fClass = _dnlibHelper.FindClassWithEntityName(name, DnlibHelper.SearchType.Method);
-                var fMethod = _dnlibHelper.FindMethodByName(fClass, name);
-                var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+                StructureGenerator nestedStruct = new("AFKMonitor");
 
-                structGenerator.AddClassName(fField.GetTypeName(), variable, name);
+                var fClass_tmp = _dnlibHelper.FindClassWithEntityName(name, DnlibHelper.SearchType.Method);
+                var fMethod_tmp = _dnlibHelper.FindMethodByName(fClass_tmp, name);
+                var fField_tmp = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod_tmp);
+
+                var fClass = _dnlibHelper.FindClassByTypeName(fField_tmp.GetTypeName());
+                nestedStruct.AddClassName(fClass, variable, name);
+
+                variable = "MethodName";
+                SetVariableStatus(variable);
+
+                MethodDef fMethod = null;
+                foreach (var nestedType in fClass.NestedTypes)
+                {
+                    if (nestedType.IsValueType)
+                    {
+                        fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, nestedType, "Input.anyKeyDown");
+                        if (fMethod == null)
+                            continue;
+                    }
+                }
+
+                nestedStruct.AddMethodName(fMethod, variable, name);
+
+                structGenerator.AddStruct(nestedStruct);
             }
 
             {
                 string name = "VitalParts";
                 string entity = "get_VitalParts";
-                string cVariable = "VitalPartsTestClass";
-                string mVariable = "VitalPartsTestMethod";
-                SetVariableStatus(cVariable);
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("VitalParts");
 
                 var fClass = _dnlibHelper.FindClassWithEntityName(name, DnlibHelper.SearchType.Property);
 
-                structGenerator.AddClassName(fClass, cVariable, name, true);
+                nestedStruct.AddClassName(fClass, variable, name, true);
 
-                SetVariableStatus(mVariable);
-                var fMethod = _decompiler.DecompileClassMethod(fClass, entity);
-                var fCalledMethod = _dnlibHelper.ExtractLinqCalledMethod(fMethod.Body);
+                var fMethod_tmp = _decompiler_Basic.DecompileClassMethod(fClass, entity);
+                var fCalledMethod = _dnlibHelper.ExtractLinqCalledMethod(fMethod_tmp.Body);
 
-                structGenerator.AddMethodName(fCalledMethod, mVariable, entity);
+                variable = "MethodName";
+                SetVariableStatus(variable);
+
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, fCalledMethod);
+                nestedStruct.AddMethodName(fMethod, variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
             }
 
             {
@@ -215,53 +275,39 @@ namespace TarkovDumper
                 SetVariableStatus(name);
                 
                 StructureGenerator nestedStruct = new("EquipmentPenaltyComponent");
-                nestedStruct.AddString("ClassName", name + @"+\uE000");
 
                 var fClass = _dnlibHelper.FindClassByTypeName(name);
                 var dClass = fClass.GetTypes().First();
 
+                nestedStruct.AddClassName(dClass, "ClassName", "N/A", true, true);
+
                 {
                     string variable = "BaseCalculationMethod";
                     string entity = "Sum(sumPredicate);";
-                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, dClass, entity);
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, dClass, entity);
                     nestedStruct.AddMethodName(fMethod, variable, entity);
                 }
 
                 {
                     string variable = "SpeedPenaltyPercent";
                     string entity = "SpeedPenaltyPercent;";
-                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, dClass, entity);
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, dClass, entity);
                     nestedStruct.AddMethodName(fMethod, variable, entity);
                 }
 
                 {
                     string variable = "MousePenalty";
                     string entity = "MousePenalty;";
-                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, dClass, entity);
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, dClass, entity);
                     nestedStruct.AddMethodName(fMethod, variable, entity);
                 }
 
                 {
                     string variable = "WeaponErgonomicPenalty";
                     string entity = "WeaponErgonomicPenalty;";
-                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, dClass, entity);
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, dClass, entity);
                     nestedStruct.AddMethodName(fMethod, variable, entity);
                 }
-
-                structGenerator.AddStruct(nestedStruct);
-            }
-
-            {
-                string name = "UnlimitedSearch";
-                SetVariableStatus(name);
-
-                StructureGenerator nestedStruct = new(name);
-
-                nestedStruct.AddMethodName("CanStartNewSearchOperation", "MethodName", "N/A");
-
-                string entity = "CanStartNewSearchOperation";
-                var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method);
-                nestedStruct.AddClassName(fClass, "ClassName", entity);
 
                 structGenerator.AddStruct(nestedStruct);
             }
@@ -276,6 +322,9 @@ namespace TarkovDumper
                 var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method);
                 nestedStruct.AddClassName(fClass, "ClassName", entity);
 
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, entity);
+                nestedStruct.AddMethodName(fMethod, "MethodName", entity);
+
                 structGenerator.AddStruct(nestedStruct);
             }
 
@@ -287,10 +336,11 @@ namespace TarkovDumper
 
                 string entity = "GetMalfunctionState";
 
-                nestedStruct.AddMethodName(entity, "MethodName", "N/A");
-
                 var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method);
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, entity);
+
                 nestedStruct.AddClassName(fClass, "ClassName", entity, true);
+                nestedStruct.AddMethodName(fMethod, "GetMalfunctionState", "N/A");
 
                 structGenerator.AddStruct(nestedStruct);
             }
@@ -305,11 +355,14 @@ namespace TarkovDumper
                 string entity2 = "IsAtBindablePlace";
                 string entity3 = "IsAllowedToSeeSlot";
 
-                nestedStruct.AddMethodName(entity1, "KeybindFromAnywhereMethodA", "N/A");
-                nestedStruct.AddMethodName(entity2, "KeybindFromAnywhereMethodB", "N/A");
-                nestedStruct.AddMethodName(entity3, "ShowOwnDogTagMethod", "N/A");
-
                 var fClass = _dnlibHelper.FindClassWithEntityName(entity1, DnlibHelper.SearchType.Method);
+                var fMethod1 = _dnlibHelper.FindMethodByName(fClass, entity1);
+                var fMethod2 = _dnlibHelper.FindMethodByName(fClass, entity2);
+                var fMethod3 = _dnlibHelper.FindMethodByName(fClass, entity3);
+
+                nestedStruct.AddMethodName(fMethod1, "KeybindFromAnywhereMethodA", entity1);
+                nestedStruct.AddMethodName(fMethod2, "KeybindFromAnywhereMethodB", entity2);
+                nestedStruct.AddMethodName(fMethod3, "ShowOwnDogTagMethod", entity3);
                 nestedStruct.AddClassName(fClass, "ClassName", entity1, true);
 
                 structGenerator.AddStruct(nestedStruct);
@@ -347,9 +400,15 @@ namespace TarkovDumper
                 SetVariableStatus(variable);
 
                 StructureGenerator nestedStruct = new("FovChanger");
-                nestedStruct.AddString("MethodName", entity);
 
-                nestedStruct.AddClassName(_dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method), variable, entity);
+                var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method);
+                nestedStruct.AddClassName(fClass, variable, entity);
+
+                variable = "MethodName";
+                SetVariableStatus(variable);
+
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, entity);
+                nestedStruct.AddMethodName(fMethod, variable, entity);
 
                 structGenerator.AddStruct(nestedStruct);
             }
@@ -362,6 +421,139 @@ namespace TarkovDumper
                 StructureGenerator nestedStruct = new("LocaleManager");
                 var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Method);
                 nestedStruct.AddClassName(fClass, "ClassName", entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("FirearmController");
+
+                var fClass = _dnlibHelper.FindClassByTypeName("FirearmController");
+
+                nestedStruct.AddClassName(fClass, variable, "N/A", true);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string entity = "LookSensor";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new(entity);
+
+                var fClass = _dnlibHelper.FindClassByTypeName(entity);
+                nestedStruct.AddClassName(fClass, variable, entity);
+
+                entity = "CheckAllEnemies";
+                variable = "MethodName";
+                SetVariableStatus(variable);
+
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, entity);
+                nestedStruct.AddMethodName(fMethod, variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string entity = "EFT.HealthSystem.ActiveHealthController";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("ActiveHealthController");
+
+                var fClass = _dnlibHelper.FindClassByTypeName(entity);
+                nestedStruct.AddClassName(fClass, variable, entity, true);
+
+                entity = "HandleFall";
+                variable = "MethodName";
+                SetVariableStatus(variable);
+
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, entity);
+                nestedStruct.AddMethodName(fMethod, variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string entity = "EFT.InventoryLogic.Mod";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("InventoryLogic_Mod");
+
+                var fClass = _dnlibHelper.FindClassByTypeName(entity);
+                nestedStruct.AddClassName(fClass, variable, entity, true);
+
+                entity = "get_RaidModdable";
+                variable = "MethodName";
+                SetVariableStatus(variable);
+
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, entity);
+                nestedStruct.AddMethodName(fMethod, variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string entity = "EFT.Animations.ProceduralWeaponAnimation";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("ProceduralWeaponAnimation");
+
+                var fClass = _dnlibHelper.FindClassByTypeName(entity);
+                nestedStruct.AddClassName(fClass, variable, entity, true);
+
+                entity = "get_ShotNeedsFovAdjustments";
+                variable = "MethodName";
+                SetVariableStatus(variable);
+
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, entity);
+                nestedStruct.AddMethodName(fMethod, variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string entity = "EFT.MovementContext";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("MovementContext");
+
+                var fClass = _dnlibHelper.FindClassByTypeName(entity);
+                nestedStruct.AddClassName(fClass, variable, entity, true);
+
+                entity = "SetPhysicalCondition";
+                variable = "MethodName";
+                SetVariableStatus(variable);
+
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, entity);
+                nestedStruct.AddMethodName(fMethod, variable, entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string entity = "GrenadeFlashScreenEffect";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new(entity);
+
+                var fClass = _dnlibHelper.FindClassByTypeName(entity);
+                nestedStruct.AddClassName(fClass, variable, entity);
+
+                entity = "Update";
+                variable = "MethodName";
+                SetVariableStatus(variable);
+
+                var fMethod = _dnlibHelper.FindMethodByName(fClass, entity);
+                nestedStruct.AddMethodName(fMethod, variable, entity);
 
                 structGenerator.AddStruct(nestedStruct);
             }
@@ -393,7 +585,7 @@ namespace TarkovDumper
                 };
                 string fClass2 = _dumpParser.FindOffsetGroupWithEntities(searchEntities2);
                 var fClass2Real = _dnlibHelper.FindClassByTypeName(fClass2.Replace("-.", ""));
-                string fMethod2Decompiled = _decompiler.DecompileClassMethod(fClass2Real, "set_IsInSession").Body;
+                string fMethod2Decompiled = _decompiler_Basic.DecompileClassMethod(fClass2Real, "set_IsInSession").Body;
                 string fField = TextHelper.FindSubstringAndGoBackwards(fMethod2Decompiled, ".EndStatisticsSession", '.');
                 var offset2 = _dumpParser.FindOffsetByName(fClass2, fField);
 
@@ -535,8 +727,8 @@ namespace TarkovDumper
 
                     const string searchString = " = loadBundlesAndCreatePools;";
                     TypeDef foundClass = _dnlibHelper.FindClassByTypeName("EFT.GameWorld");
-                    MethodDef foundMethod = _dnlibHelper.FindMethodThatContains(_decompiler, foundClass, searchString, false);
-                    var decompiled = _decompiler.DecompileClassMethod(foundClass, foundMethod.Humanize());
+                    MethodDef foundMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Async, foundClass, searchString);
+                    var decompiled = _decompiler_Async.DecompileClassMethod(foundClass, foundMethod.Humanize());
 
                     var startIndex = decompiled.Body.IndexOf("= loadBundlesAndCreatePools");
                     string fieldName = TextHelper.FindSubstringAndGoBackwards(decompiled.Body, searchString);
@@ -660,7 +852,7 @@ namespace TarkovDumper
 
                     var fClass = _dnlibHelper.FindClassWithEntityName("GetSyncObjectStrategyByType", DnlibHelper.SearchType.Method);
 
-                    var decompiled = _decompiler.DecompileClassMethod(fClass, "InitStaticObject");
+                    var decompiled = _decompiler_Basic.DecompileClassMethod(fClass, "InitStaticObject");
                     string fField = TextHelper.FindSubstringAndGoBackwards(decompiled.Body, ".Add", '.');
 
                     var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField);
@@ -1783,8 +1975,8 @@ namespace TarkovDumper
                     entity = "IsOverweightA";
 
                     const string substring = "&& weight > PreviousWeight";
-                    MethodDef fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, fClass, substring);
-                    var decompiled = _decompiler.DecompileClassMethod(fClass, fMethod.Humanize());
+                    MethodDef fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, fClass, substring);
+                    var decompiled = _decompiler_Basic.DecompileClassMethod(fClass, fMethod.Humanize());
                     string fieldName = TextHelper.FindSubstringAndGoBackwards(decompiled.Body, substring, '(');
 
                     var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fieldName);
@@ -1795,8 +1987,8 @@ namespace TarkovDumper
                     entity = "IsOverweightB";
 
                     const string substring = "!= flag2)";
-                    MethodDef fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, fClass, substring);
-                    var decompiled = _decompiler.DecompileClassMethod(fClass, fMethod.Humanize());
+                    MethodDef fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, fClass, substring);
+                    var decompiled = _decompiler_Basic.DecompileClassMethod(fClass, fMethod.Humanize());
                     string fieldName = TextHelper.FindSubstringAndGoBackwards(decompiled.Body, substring, '(');
 
                     var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fieldName);
@@ -2618,7 +2810,7 @@ namespace TarkovDumper
                     var fClass = _dnlibHelper.FindClassByTypeName(tClass3);
                     var fMethod = _dnlibHelper.FindMethodByName(fClass, "get_Count");
 
-                    string methodBody = _decompiler.DecompileClassMethod(fClass, "get_Count").Body;
+                    string methodBody = _decompiler_Basic.DecompileClassMethod(fClass, "get_Count").Body;
                     string fField = TextHelper.FindSubstringAndGoBackwards(methodBody, ".Count", ' ');
 
                     var offset = _dumpParser.FindOffsetByName(tClass3, fField);
@@ -2820,7 +3012,7 @@ namespace TarkovDumper
                     entity = "TotalCenterOfImpact";
 
                     var fClass = _dnlibHelper.FindClassByTypeName(className.Split('.')[1]);
-                    var methodBody = _decompiler.DecompileClassMethod(fClass, "WeaponModified").Body;
+                    var methodBody = _decompiler_Basic.DecompileClassMethod(fClass, "WeaponModified").Body;
                     var fField = TextHelper.FindSubstringAndGoBackwards(methodBody, " = Item.GetTotalCenterOfImpact", '.');
 
                     var offset = _dumpParser.FindOffsetByName(className, fField);
@@ -3164,6 +3356,26 @@ namespace TarkovDumper
                     var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
 
                     var offset = _dumpParser.FindOffsetByName(className, fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "InteractiveCorpse";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "EFT.Interactive.Corpse";
+
+                {
+                    entity = "PlayerBody";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
                 }
 
@@ -4311,7 +4523,7 @@ namespace TarkovDumper
                     var baseType = screenManagerClass.BaseType.FullName.Humanize();
 
                     var fClass = _dnlibHelper.FindClassByTypeName(baseType);
-                    string decompiledMethod = _decompiler.DecompileClassMethod(fClass, "get_CurrentScreenController").Body;
+                    string decompiledMethod = _decompiler_Basic.DecompileClassMethod(fClass, "get_CurrentScreenController").Body;
                     string fField = TextHelper.FindSubstringAndGoBackwards(decompiledMethod, ";");
 
                     var offset = _dumpParser.FindOffsetByName(baseType, fField);
@@ -4340,7 +4552,7 @@ namespace TarkovDumper
                 {
                     entity = "Generic";
 
-                    string decompiledMethod = _decompiler.DecompileClassMethod(currentScreenControllerClass, "DisplayScreen").Body;
+                    string decompiledMethod = _decompiler_Basic.DecompileClassMethod(currentScreenControllerClass, "DisplayScreen").Body;
                     string fField = TextHelper.FindSubstringAndGoBackwards(decompiledMethod, ".Show(", '.');
                     string typeName = currentScreenControllerClass.DeclaringType.Humanize() + '.' + currentScreenControllerClass.Humanize();
 
@@ -4566,7 +4778,7 @@ namespace TarkovDumper
                 {
                     entity = "Instance";
 
-                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, fClass, $"new {fClass.Humanize()}()");
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, fClass, $"new {fClass.Humanize()}()");
                     var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
 
                     var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
@@ -4576,8 +4788,8 @@ namespace TarkovDumper
                 {
                     entity = "LocaleDictionary";
 
-                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler, fClass, "mainFallBack.atlasPopulationMode");
-                    var decompiled = _decompiler.DecompileClassMethod(fClass, fMethod.Humanize());
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, fClass, "mainFallBack.atlasPopulationMode");
+                    var decompiled = _decompiler_Basic.DecompileClassMethod(fClass, fMethod.Humanize());
                     int start = decompiled.Body.IndexOf("mainFallBack.atlasPopulationMode");
                     int end = decompiled.Body.IndexOf(".TryGetValue", start);
                     string fField = TextHelper.FindSubstringAndGoBackwards(decompiled.Body, null, '.', end);
@@ -4589,7 +4801,7 @@ namespace TarkovDumper
                 {
                     entity = "CurrentCulture";
 
-                    var decompiled = _decompiler.DecompileClassMethods(fClass);
+                    var decompiled = _decompiler_Basic.DecompileClassMethods(fClass);
                     string getter = null;
                     foreach (var method in decompiled)
                     {

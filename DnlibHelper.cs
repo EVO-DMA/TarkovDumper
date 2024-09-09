@@ -177,14 +177,31 @@ namespace TarkovDumper
             if (type == null)
                 return null;
 
-            foreach (var method in type.Methods)
+            static MethodDef SearchForMethod(TypeDef type, string methodName)
             {
-                const StringComparison sc = StringComparison.OrdinalIgnoreCase;
-                if (method.Humanize().Equals(methodName, sc) ||
-                    method.HumanizeAlt().Equals(methodName, sc))
+                foreach (var method in type.Methods)
                 {
-                    return method;
+                    const StringComparison sc = StringComparison.OrdinalIgnoreCase;
+                    if (method.Humanize().Equals(methodName, sc) ||
+                        method.HumanizeAlt().Equals(methodName, sc))
+                    {
+                        return method;
+                    }
                 }
+
+                return null;
+            }
+
+            var fMethod = SearchForMethod(type, methodName);
+            if (fMethod != null)
+                return fMethod;
+
+            // Search nested types
+            foreach (var nestedType in type.NestedTypes)
+            {
+                var fMethodNested = SearchForMethod(nestedType, methodName);
+                if (fMethodNested != null)
+                    return fMethodNested;
             }
 
             return null;
