@@ -426,6 +426,30 @@ namespace TarkovDumper
             }
 
             {
+                string entity = "HighPolyWithTerrainMask";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("LayerManager");
+                var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Field);
+                nestedStruct.AddClassName(fClass, "ClassName", entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string entity = "PENETRATION_RICOCHET_PENALTY";
+                string variable = "ClassName";
+                SetVariableStatus(variable);
+
+                StructureGenerator nestedStruct = new("BallisticLayerManager");
+                var fClass = _dnlibHelper.FindClassWithEntityName(entity, DnlibHelper.SearchType.Field);
+                nestedStruct.AddClassName(fClass, "ClassName", entity);
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
                 string variable = "ClassName";
                 SetVariableStatus(variable);
 
@@ -4825,6 +4849,63 @@ namespace TarkovDumper
                         var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), fField.GetFieldName());
                         nestedStruct.AddOffset(entity, offset);
                     }
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "LayerMask";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                {
+                    entity = "m_Mask";
+
+                    nestedStruct.AddOffset(entity, new(true, new(entity, "[HUMAN] Int32", 0x0)));
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "LayerManager";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                var fClass = _dnlibHelper.FindClassWithEntityName("HighPolyWithTerrainMask", DnlibHelper.SearchType.Field);
+
+                {
+                    entity = "HighPolyWithTerrainMask";
+
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "BallisticLayerManager";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                var fClass = _dnlibHelper.FindClassWithEntityName("PENETRATION_RICOCHET_PENALTY", DnlibHelper.SearchType.Field);
+
+                {
+                    entity = "HitMask";
+
+                    var offset = _dumpParser.FindOffsetByName(fClass.Humanize(), entity);
+                    nestedStruct.AddOffset(entity, offset);
                 }
 
                 structGenerator.AddStruct(nestedStruct);
