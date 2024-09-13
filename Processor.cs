@@ -235,9 +235,9 @@ namespace TarkovDumper
                 {
                     if (nestedType.IsValueType)
                     {
-                        fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, nestedType, "Input.anyKeyDown");
-                        if (fMethod == null)
-                            continue;
+                        fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, nestedType, "Input.anyKeyDown", false);
+                        if (fMethod != null)
+                            break;
                     }
                 }
 
@@ -277,7 +277,17 @@ namespace TarkovDumper
                 StructureGenerator nestedStruct = new("EquipmentPenaltyComponent");
 
                 var fClass = _dnlibHelper.FindClassByTypeName(name);
-                var dClass = fClass.GetTypes().First();
+
+                TypeDef dClass = null;
+                foreach (var typeDef in fClass.GetTypes())
+                {
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, typeDef, "GetItemComponentsInChildren");
+                    if (fMethod != null)
+                    {
+                        dClass = typeDef;
+                        break;
+                    }
+                }
 
                 nestedStruct.AddClassName(dClass, "ClassName", "N/A", true, true);
 
