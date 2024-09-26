@@ -3508,7 +3508,7 @@ namespace TarkovDumper
                 }
 
                 {
-                    entity = "SpawnedInSession";
+                    entity = "<SpawnedInSession>k__BackingField";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
