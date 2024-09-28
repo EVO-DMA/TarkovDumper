@@ -667,6 +667,7 @@ namespace TarkovDumper
             }
 
             DumpParser.Result<DumpParser.OffsetData> TransitControllerOffset = default;
+            DumpParser.Result<DumpParser.OffsetData> ClientShellingControllerOffset = default;
 
             {
                 string name = "ClientLocalGameWorld";
@@ -697,6 +698,17 @@ namespace TarkovDumper
                     var fClass = _dnlibHelper.FindClassWithEntityName("DisableTransitPoints", DnlibHelper.SearchType.Method);
                     TransitControllerOffset = _dumpParser.FindOffsetByTypeName(name, $"-.{fClass.Humanize()}");
                     nestedStruct.AddOffset(entity, TransitControllerOffset);
+                }
+                
+                {
+                    entity = "ClientShellingController";
+
+                    var fClass = _dnlibHelper.FindClassByTypeName("EFT.GameWorld");
+                    var fMethod = _dnlibHelper.FindMethodByName(fClass, "get_ClientShellingController");
+                    var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+
+                    ClientShellingControllerOffset = _dumpParser.FindOffsetByName(name, fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, ClientShellingControllerOffset);
                 }
 
                 {
@@ -796,6 +808,68 @@ namespace TarkovDumper
                 }
 
             end:
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "ClientShellingController";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                if (!ClientShellingControllerOffset.Success)
+                {
+                    nestedStruct.AddOffset(name, ClientShellingControllerOffset);
+                    goto end;
+                }
+
+                {
+                    entity = "ActiveClientProjectiles";
+
+                    var offset = _dumpParser.FindOffsetByName(ClientShellingControllerOffset.Value.TypeName, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+            end:
+                structGenerator.AddStruct(nestedStruct);
+            }
+
+            {
+                string name = "ArtilleryProjectileClient";
+                SetVariableStatus(name);
+
+                StructureGenerator nestedStruct = new(name);
+
+                string entity;
+
+                const string className = "CommonAssets.Scripts.ArtilleryShelling.Client.ArtilleryProjectileClient";
+
+                var ThisClass = _dnlibHelper.FindClassByTypeName(className);
+
+                {
+                    entity = "IsActive";
+    
+                    var fMethod = _dnlibHelper.FindMethodByName(ThisClass, "Update");
+                    var fField = _dnlibHelper.GetNthFieldReferencedByMethod(fMethod);
+
+                    var offset = _dumpParser.FindOffsetByName(className, fField.GetFieldName());
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "Position";
+
+                    const string searchString = " = Vector3.zero;";
+                    var fMethod = _dnlibHelper.FindMethodThatContains(_decompiler_Basic, ThisClass, searchString);
+                    var decompiledMethod = _decompiler_Basic.DecompileClassMethod(ThisClass, fMethod.Humanize());
+                    var fFieldName = TextHelper.FindSubstringAndGoBackwards(decompiledMethod.Body, searchString, '.');
+
+                    var offset = _dumpParser.FindOffsetByName(className, fFieldName);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
                 structGenerator.AddStruct(nestedStruct);
             }
 
@@ -3868,6 +3942,13 @@ namespace TarkovDumper
 
                 {
                     entity = "BodySkins";
+
+                    var offset = _dumpParser.FindOffsetByName(className, entity);
+                    nestedStruct.AddOffset(entity, offset);
+                }
+
+                {
+                    entity = "_bodyRenderers";
 
                     var offset = _dumpParser.FindOffsetByName(className, entity);
                     nestedStruct.AddOffset(entity, offset);
